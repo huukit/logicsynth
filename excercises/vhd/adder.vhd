@@ -27,7 +27,8 @@ entity adder is
   );                          -- is i.e 8, the definition below must be (8 - 1) because the vector starts from 0. 
     
   port(
-    clk, rst_n : in std_logic;
+    clk : in std_logic;                                       -- Clock signal.
+    rst_n :in std_logic;                                      -- Reset, active low.
     a_in : in std_logic_vector(operand_width_g - 1 downto 0); -- Input a.
     b_in : in std_logic_vector(operand_width_g - 1 downto 0); -- Input b.
     sum_out : out std_logic_vector(operand_width_g downto 0)  -- Sum output.
@@ -37,18 +38,20 @@ end adder;
 
 architecture rtl of adder is
   
-  SIGNAL result : signed((operand_width_g) downto 0); -- Result register.
+  SIGNAL result_r : signed((operand_width_g) downto 0); -- Result register.
   
 begin -- rtl
-  sum_out <= std_logic_vector(result); -- Assign register to output.
+  sum_out <= std_logic_vector(result_r); -- Assign register to output.
  
-  CALCPROC : process (clk, rst_n) -- Handle the actual calculation of values and reset.
+  calculate : process (clk, rst_n, a_in, b_in) -- Handle the actual calculation of values and reset.
   begin
     if(rst_n = '0') then -- Reset
-      result <= (others => '0');
+      result_r <= (others => '0');
     elsif(clk'event and clk = '1') then -- Calculate on rising edge of clock.
-      result <= resize(signed(a_in), operand_width_g + 1) + resize(signed(b_in), operand_width_g + 1);
+      result_r <= resize(signed(a_in), operand_width_g + 1) + resize(signed(b_in), operand_width_g + 1);
+    else -- Avoid latches.
+      result_r <= result_r;
     end if;
-  end process CALCPROC;
+  end process calculate;
 
 end rtl;
