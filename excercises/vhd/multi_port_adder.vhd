@@ -9,7 +9,7 @@
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
--- Description: Second excercise.
+-- Description: Fourth excercise.
 -------------------------------------------------------------------------------
 -- Copyright (c) 2015 
 -------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ begin -- structural
     
   adder_c : adder
     generic map(
-      operand_width_g => operand_width_g
+      operand_width_g => (operand_width_g + 1)
     )
     port map(
       clk => clk,
@@ -89,5 +89,7 @@ begin -- structural
       sum_out => total_r
     ); 
     
-    assert (num_of_operands_g /= 4) report "num_of_operands_g is not 4" severity failure;
+    sum_out <= total_r((operand_width_g - 1) downto 0);
+    
+    assert (num_of_operands_g = 4) report "failure: num_of_operands_g is not 4" severity failure;
 end structural;
