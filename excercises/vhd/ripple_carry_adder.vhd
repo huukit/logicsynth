@@ -2,7 +2,7 @@
 -- Title      : TIE-50206, Exercise 02
 -- Project    : 
 -------------------------------------------------------------------------------
--- File       : tb_ripple_carry_adder.vhd
+-- File       : ripple_carry_adder.vhd
 -- Author     : Tuomas Huuki
 -- Company    : TUT
 -- Created    : 28.10.2015
