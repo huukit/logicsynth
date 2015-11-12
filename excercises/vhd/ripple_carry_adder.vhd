@@ -3,68 +3,65 @@
 -- Project    : 
 -------------------------------------------------------------------------------
 -- File       : ripple_carry_adder.vhd
--- Author     : Tuomas Huuki, Jonas Nikula
+-- Author     : Jonas Nikula
 -- Company    : TUT
--- Created    : 28.10.2015
+-- Created    : 2015-10-30
 -- Platform   : 
 -- Standard   : VHDL'87
 -------------------------------------------------------------------------------
--- Description: Second excercise.
+-- Description: Sums two 3-bit values
 -------------------------------------------------------------------------------
 -- Copyright (c) 2015 
 -------------------------------------------------------------------------------
--- Revisions  :
--- Date         Version  Author          Description
--- 28.10.2015   1.0      tuhu, nikulaj   Created
--------------------------------------------------------------------------------
 
--- TODO: Add library called ieee here
---       And use package called std_logic_1164 from the library
+
+-- Include default libraries
 library ieee;
 use ieee.std_logic_1164.all;
 
--- TODO: Declare entity here
+
+-- DONE: Declare entity here
 -- Name: ripple_carry_adder
 -- No generics yet
 -- Ports: a_in  3-bit std_logic_vector
 --        b_in  3-bit std_logic_vector
 --        s_out 4-bit std_logic_vector
 entity ripple_carry_adder is
-  PORT (
-    a_in  : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-    b_in  : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-    s_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
-    );
+  port (a_in, b_in: in std_logic_vector(2 downto 0);
+       s_out: out std_logic_vector(3 downto 0));
 end ripple_carry_adder;
+
+
 
 -------------------------------------------------------------------------------
 
 -- Architecture called 'gate' is already defined. Just fill it.
 -- Architecture defines an implementation for an entity
 architecture gate of ripple_carry_adder is
-
-  -- TODO: Add your internal signal declarations here
-  SIGNAL carry_ha : STD_LOGIC;
-  SIGNAL carry_fa : STD_LOGIC;
-  SIGNAL C, D, E, F, G, H : STD_LOGIC;
-  
+  -- DONE: Add your internal signal declarations here
+  signal Carry_ha, C, D, E, Carry_fa, F, G, H : std_logic;
+  -- component gate
+  --   port (a, b: in bit;
+  --         c: out bit);
+  -- end component;
 begin  -- gate
-  -- Half adder.
-  s_out(0) <= a_in(0) XOR b_in(0);
-  carry_ha <= a_in(0) AND b_in(0);
+  -- DONE: Add signal assignments here
+  -- x(0) <= y and z(2);
+  -- Remember that VHDL signal assignments happen in parallel
+  -- Don't use processes
+  s_out(0) <= a_in(0) xor b_in(0);
+  Carry_ha <= a_in(0) and b_in(0);
 
-  -- Full adder 1.
-  C <= a_in(1) XOR b_in(1);
-  D <= carry_ha AND C;
-  E <= a_in(1) AND b_in(1);
-  s_out(1) <= carry_ha XOR C;
-  carry_fa <= D OR E;
-  
-  -- Full adder 2.  
-  F <= a_in(2) XOR b_in(2);
-  G <= carry_fa AND F;
-  H <= a_in(2) AND b_in(2);
-  s_out(2) <= carry_fa XOR F;
-  s_out(3) <= G OR H;
-  
+  C <= a_in(1) xor b_in(1);
+  E <= a_in(1) and b_in(1);
+  D <= C and Carry_ha;
+  s_out(1) <= C xor Carry_ha;
+  Carry_fa <= D or E;
+
+  F <= a_in(2) xor b_in(2);
+  H <= a_in(2) and b_in(2);
+  s_out(2) <= F xor Carry_fa;
+  G <= F and Carry_fa;
+  s_out(3) <= G and H;
+
 end gate;
