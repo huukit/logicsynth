@@ -3,7 +3,7 @@
 -- Project    : 
 -------------------------------------------------------------------------------
 -- File       : adder.vhd
--- Author     : Tuomas Huuki
+-- Author     : Tuomas Huuki, Jonas Nikula
 -- Company    : TUT
 -- Created    : 4.11.2015
 -- Platform   : 
@@ -14,8 +14,8 @@
 -- Copyright (c) 2015 
 -------------------------------------------------------------------------------
 -- Revisions  :
--- Date        Version  Author  Description
--- 4.11.2015   1.0      tuhu    Created
+-- Date        Version  Author          Description
+-- 4.11.2015   1.0      tuhu, nikulaj   Created
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;

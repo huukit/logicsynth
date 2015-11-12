@@ -3,7 +3,7 @@
 -- Project    : 
 -------------------------------------------------------------------------------
 -- File       : ripple_carry_adder.vhd
--- Author     : Tuomas Huuki
+-- Author     : Tuomas Huuki, Jonas Nikula
 -- Company    : TUT
 -- Created    : 28.10.2015
 -- Platform   : 
@@ -14,8 +14,8 @@
 -- Copyright (c) 2015 
 -------------------------------------------------------------------------------
 -- Revisions  :
--- Date        Version  Author  Description
--- 28.10.2015  1.0      tuhu    Created
+-- Date         Version  Author          Description
+-- 28.10.2015   1.0      tuhu, nikulaj   Created
 -------------------------------------------------------------------------------
 
 -- TODO: Add library called ieee here
