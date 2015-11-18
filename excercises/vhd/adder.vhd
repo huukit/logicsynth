@@ -43,14 +43,12 @@ architecture rtl of adder is
 begin -- rtl
   sum_out <= std_logic_vector(result_r); -- Assign register to output.
  
-  calculate : process (clk, rst_n, a_in, b_in) -- Handle the actual calculation of values and reset.
+  calculate : process (clk, rst_n) -- Handle the actual calculation of values and reset.
   begin
     if(rst_n = '0') then -- Reset
       result_r <= (others => '0');
     elsif(clk'event and clk = '1') then -- Calculate on rising edge of clock.
       result_r <= resize(signed(a_in), operand_width_g + 1) + resize(signed(b_in), operand_width_g + 1);
-    else -- Avoid latches.
-      result_r <= result_r;
     end if;
   end process calculate;
 
