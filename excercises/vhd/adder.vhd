@@ -16,6 +16,7 @@
 -- Revisions  :
 -- Date        Version  Author  Description
 -- 4.11.2015   1.0      tuhu    Created
+-- 18.11.2015  1.1      tuhu    Modified process.
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
