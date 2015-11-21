@@ -1,0 +1,90 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+d/home/nikulaj/skool/tie_50200_harkat/exercise4
+Eadder
+Z0 w1448046823
+Z1 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z3 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+Z4 d/home/nikulaj/skool/tie_50200_harkat/exercise4_bonus
+Z5 8vhd/adder.vhd
+Z6 Fvhd/adder.vhd
+l0
+L26
+VN?4cLlY3>CU4nj9H>e0oD3
+!s100 9`3GGnZ;LWON36A^l28zT1
+Z7 OV;C;10.3d;59
+32
+Z8 !s110 1448048800
+!i10b 1
+Z9 !s108 1448048800.421381
+Z10 !s90 -2002|-work|my_lib|-check_synthesis|vhd/adder.vhd|
+Z11 !s107 vhd/adder.vhd|
+!i113 1
+Z12 o-2002 -work my_lib -check_synthesis
+Z13 tExplicit 1
+Artl
+R1
+R2
+R3
+DEx4 work 5 adder 0 22 N?4cLlY3>CU4nj9H>e0oD3
+l46
+L42
+VebBNh`@fRKFBFWi?FFjNE1
+!s100 B9g<z1mAeio5;]i9i14dO0
+R7
+32
+R8
+!i10b 1
+R9
+R10
+R11
+!i113 1
+R12
+R13
+Emulti_port_adder
+Z14 w1448048799
+R2
+R3
+R4
+Z15 8vhd/multi_port_adder.vhd
+Z16 Fvhd/multi_port_adder.vhd
+l0
+L24
+VIQ[>ag4^3YN_m330NbX>53
+!s100 boCa5A4;<GU1DK`4LoYBo1
+R7
+32
+Z17 !s110 1448049006
+!i10b 1
+Z18 !s108 1448049006.307289
+Z19 !s90 -check_synthesis|vhd/multi_port_adder.vhd|
+Z20 !s107 vhd/multi_port_adder.vhd|
+!i113 1
+Z21 o-check_synthesis
+R13
+Astructural
+R2
+R3
+DEx4 work 16 multi_port_adder 0 22 IQ[>ag4^3YN_m330NbX>53
+l62
+L37
+V[ASoQo8c;Bk0_>Bm?QM1a0
+Z22 !s100 dMAeQ?[<TZ1i[Rzo@2BMY2
+R7
+32
+R17
+!i10b 1
+R18
+R19
+R20
+!i113 1
+R21
+R13
