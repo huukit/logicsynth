@@ -30,3 +30,4 @@ core*
 *~
 .*history
 build-*
+*.swp
