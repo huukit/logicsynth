@@ -40,9 +40,8 @@ end wave_gen;
 
 architecture rtl of wave_gen is
   type dir_type is (up, down);
-  constant steps_c      : integer := (2**(width_g - 1) - 1)/step_g * step_g;
-  constant maxval_c     : integer := steps_c / step_g - 1;
-  constant minval_c     : integer := -(maxval_c + 1);
+  constant maxval_c      : integer := (2**(width_g - 1) - 1)/step_g * step_g;
+  constant minval_c     : integer := -maxval_c;
   
   signal dir_r          : dir_type;
   signal count_r        : signed(width_g - 1 downto 0);
@@ -76,9 +75,9 @@ begin -- rtl
       if(sync_clear_in = '1') then
         dir_r <= up;
       else
-        if(count_r = maxval_c) then
+        if(count_r + step_g = maxval_c) then
           dir_r <= down;
-        elsif(count_r = minval_c) then
+        elsif(count_r - step_g = minval_c) then
           dir_r <= up;
         end if;
       end if;
