@@ -38,7 +38,7 @@ end wave_gen;
 
 architecture rtl of wave_gen is
   
-  type dir_type is (up, down); -- Definition for counter direction type.
+  type dir_type is (up_t, down_t); -- Definition for counter direction type.
     
   constant maxval_c     : integer := (2**(width_g - 1) - 1)/step_g * step_g; -- Maximum value for counter.
   constant minval_c     : integer := -maxval_c; -- Minimun value for counter.
@@ -50,6 +50,10 @@ begin -- rtl
 
   value_out <= std_logic_vector(count_r); -- Assign register to output.
   
+  dir_r <= down_t when (count_r = maxval_c) -- Detect direction and update.
+      else up_t   when (count_r = minval_c)
+      else up_t   when (sync_clear_in = '1' or rst_n = '0');  
+  
   count : process (clk, rst_n) -- Process to increment or decrement counter value.
   begin
     if(rst_n = '0') then 
@@ -59,30 +63,13 @@ begin -- rtl
         count_r <= (others => '0'); -- ... or if the sync bit is active.
       else
         case (dir_r) is -- Check the direction and step the counter up or down.
-          when up =>
+          when up_t =>
             count_r <= count_r + step_g; -- Step counter up.
-          when down =>
+          when down_t =>
             count_r <= count_r - step_g; -- Step counter down.
         end case; -- dir_r
       end if; -- sync_clear_in
     end if; -- clk'event ...
   end process count;
-  
-  compare : process (clk, rst_n) -- Process to do compare and change direction.
-  begin
-    if(rst_n = '0') then 
-      dir_r <= up; -- Set the default direction of the counter on reset ...
-    elsif(clk'event and clk = '1') then
-      if(sync_clear_in = '1') then
-        dir_r <= up; -- ... and also set the counter direction on sync bit active.
-      else
-        if((count_r + step_g) = maxval_c) then     -- If we are on the limit on the next round ...
-          dir_r <= down;                           -- ... change the direction of the counter. 
-        elsif((count_r - step_g) = minval_c) then  -- Note, as assignments take place after the block          
-          dir_r <= up;                             -- has been executed, we need to change the direction 
-        end if; -- count_r                         -- before hitting the actual limit.
-      end if; -- sync_clear_in
-    end if; -- clk'event ...
-  end process compare;
   
 end rtl;
