@@ -42,9 +42,9 @@ architecture rtl of wave_gen is
 
   constant maxval_c     : integer := (2**(width_g - 1) - 1); -- Maximum value for output.
   constant minval_c     : integer := -maxval_c; -- Minimun value for output.
-  constant decimals_c   : integer := -32;
+  constant decimals_c   : integer := -16;
   
-  constant d_c          : sfixed(width_g downto decimals_c) := resize((2 * to_sfixed(3.145, width_g, decimals_c)) / maxval_c, width_g + 5, decimals_c);
+  constant d_c          : sfixed(width_g downto decimals_c) := resize((2 * to_sfixed(3.141593, width_g, decimals_c)) / maxval_c, width_g, decimals_c);
  
   signal count_r        : sfixed(width_g downto decimals_c);
   signal sin_r          : sfixed(width_g downto decimals_c);
@@ -65,10 +65,10 @@ begin -- rtl
       sin_r <= resize(sin_r + cos_r * d_c, sin_r'high, sin_r'low);
       cos_r <= resize(cos_r - sin_r * d_c, cos_r'high, cos_r'low);
       
-      result_r <= resize(sin_r * count_r, result_r'high, result_r'low);
+      result_r <= resize(sin_r * maxval_c, result_r'high, result_r'low);
       
       count_r <= resize(count_r + to_sfixed(1.0, count_r), count_r'high, count_r'low);
-      if(count_r = maxval_c - 1) then
+      if(count_r = maxval_c) then
           count_r <= (others => '0');
           sin_r <= (others => '0');
           cos_r <= to_sfixed(1.0, cos_r);
