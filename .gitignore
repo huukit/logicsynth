@@ -30,3 +30,8 @@ core*
 *~
 .*history
 build-*
+*.swp
+*.opt
+*.ini
+my_lib
+work

@@ -14,8 +14,10 @@
 -- Copyright (c) 2015 
 -------------------------------------------------------------------------------
 -- Revisions  :
--- Date        Version  Author          Description
--- 4.11.2015   1.0      tuhu, nikulaj   Created
+-- Date        Version  Author      Description
+-- 4.11.2015   1.0      tuhu        Created
+-- 18.11.2015  1.1      tuhu        Modified process.
+-- 20.11.2015  1.1      nikulaj     Added bonus feature
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,7 +26,8 @@ use ieee.numeric_std.all;
 entity adder is
   generic(
     operand_width_g : integer -- Width of input and output. Note, that if the definition of the input width
-  );                          -- is i.e 8, the definition below must be (8 - 1) because the vector starts from 0. 
+                          -- is i.e 8, the definition below must be (8 - 1) because the vector starts from 0. 
+  );
     
   port(
     clk : in std_logic;                                       -- Clock signal.
@@ -39,18 +42,16 @@ end adder;
 architecture rtl of adder is
   
   SIGNAL result_r : signed((operand_width_g) downto 0); -- Result register.
-  
+
 begin -- rtl
   sum_out <= std_logic_vector(result_r); -- Assign register to output.
- 
-  calculate : process (clk, rst_n, a_in, b_in) -- Handle the actual calculation of values and reset.
+
+  calculate : process (clk, rst_n) -- Handle the actual calculation of values and reset.
   begin
     if(rst_n = '0') then -- Reset
       result_r <= (others => '0');
     elsif(clk'event and clk = '1') then -- Calculate on rising edge of clock.
       result_r <= resize(signed(a_in), operand_width_g + 1) + resize(signed(b_in), operand_width_g + 1);
-    else -- Avoid latches.
-      result_r <= result_r;
     end if;
   end process calculate;
 

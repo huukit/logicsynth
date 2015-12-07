@@ -1,0 +1,10 @@
+WHEN code_2 =>
+	IF (to_integer(UNSIGNED(keys_in)) = third_c) THEN
+		next_state <= code_3;
+    ELSE
+    next_state <= init; -- Bug was next_state <= code_3;
+END IF;
+
+Error made in possible to open the lock by entering invalid digit as third digit.
+
+The test bech tries all of the combinations and this would be very impractical with the force command.

@@ -1,0 +1,6 @@
+* As all the adders require 2 inputs, one input might be left unconnected.
+* Rtl describes the register-transfer-level structure and defines functionality of a block,
+  where as the structural architecture connects instances of these blocks.
+* Hierarchical design in implemented by designing the system from the lower level functionality
+  (actual logic) up to the instantiation of the logic itself and how it is connected in to the
+  rest of the system.
