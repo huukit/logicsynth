@@ -28,8 +28,9 @@ END tb_wave_gen;
 
 ARCHITECTURE testbench OF tb_wave_gen IS
 
-  CONSTANT width_c : INTEGER := 6;
---  CONSTANT width_c : INTEGER := 16;
+  -- CONSTANT width_c : INTEGER := 6;
+ -- CONSTANT width_c : INTEGER := 16;
+ CONSTANT width_c : INTEGER := 8;
 
   -- Set the clk period and total simulation length
   CONSTANT period_c         : TIME    := 10 NS;  -- 10 ns = 100 MHz
