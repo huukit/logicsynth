@@ -44,21 +44,20 @@ end wave_gen;
 
 architecture rtl of wave_gen is
 
-  constant maxval_c     : integer := (2**(width_g - 1) - 1); -- Maximum value for output.
+  constant maxval_c     : integer := (2**(width_g - 2) - 1); -- Maximum value for output.
   constant minval_c     : integer := -maxval_c; -- Minimun value for output.
   constant decimals_c   : integer := -width_g;
 
-  constant d_c          : sfixed(width_g downto decimals_c) := resize((2 * to_sfixed(3.141593, width_g, decimals_c)) / maxval_c, width_g, decimals_c);
+  constant d_c          : sfixed(width_g-1 downto decimals_c) := resize((2 * to_sfixed(3.141593, width_g-1, decimals_c)) / maxval_c, width_g-1, decimals_c);
 
-  signal count_r        : sfixed(width_g downto decimals_c);
-  signal sin_r          : sfixed(width_g downto decimals_c);
-  signal cos_r          : sfixed(width_g downto decimals_c);
-  signal result_r       : sfixed(width_g downto decimals_c); 
+  signal count_r        : sfixed(width_g-1 downto decimals_c);
+  signal sin_r          : sfixed(width_g-1 downto decimals_c);
+  signal cos_r          : sfixed(width_g-1 downto decimals_c);
+  signal result_r       : sfixed(width_g-1 downto decimals_c); 
 
 begin -- rtl
 
   value_out <= std_logic_vector(to_signed(result_r, width_g)); -- Assign register to output.
-                                                               -- count_r <= (others => '0') when (count_r = maxval_c);
 
   count : process (clk, rst_n) -- Process to increment or decrement counter value.
   begin
@@ -72,7 +71,6 @@ begin -- rtl
 
       result_r <= resize(sin_r * maxval_c, result_r'high, result_r'low);
 
-      -- count_r <= resize(count_r + to_sfixed(1.0, count_r), count_r'high, count_r'low);
       count_r <= resize(count_r + to_sfixed(1.0, count_r), count_r'high, count_r'low);
       if(count_r = maxval_c) then
         count_r <= (others => '0');
