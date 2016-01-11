@@ -35,3 +35,6 @@ build-*
 *.ini
 my_lib
 work
+*Makefile
+*transcript
+*vsim.wlf
