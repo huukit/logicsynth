@@ -43,7 +43,7 @@ end audio_ctrl;
 
 architecture rtl of audio_ctrl is
   -- Calculate contants for clock generation counters.
-  constant fs_c           : integer := (((ref_clk_freq_g / sample_rate_g) / data_width_g) / 2) - 1;
+  constant fs_c           : integer := (((ref_clk_freq_g / sample_rate_g) / data_width_g) / 4) - 1;
   constant lr_c           : integer := (data_width_g * 2) - 1;
   
   -- Define the width of the counters used.

@@ -19,6 +19,7 @@
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity tb_audio_ctrl is
   generic(
@@ -74,8 +75,8 @@ begin -- testbench
   data_generator : process(clk, rst_n)
   begin
     if(rst_n = '0') then
-      left_data_in_r <= (others => '0');
-      right_data_in_r <= (others => '0');
+      left_data_in_r <= std_logic_vector(to_unsigned(21845, left_data_in_r'length));
+      right_data_in_r <= std_logic_vector(to_unsigned(43690, right_data_in_r'length));
     elsif(clk'event and clk = '1') then
       -- Generate data ..
     end if;
