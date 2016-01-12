@@ -1,6 +1,5 @@
 -------------------------------------------------------------------------------
 -- Title      : TIE-50206, Exercise 08
-<<<<<<< HEAD
 -- Project    :
 -------------------------------------------------------------------------------
 -- File       : audio_ctrl.vhd
@@ -18,32 +17,11 @@
 -- Date        Version  Author  Description
 -- 11.1.2016   1.0      tuhu    Created
 -------------------------------------------------------------------------------
-=======
--- Project    : 
--------------------------------------------------------------------------------
--- File       : adder.vhd
--- Author     : Jonas Nikula, Tuomas Huuki
--- Company    : TUT
--- Created    : 11.01.2016
--- Platform   : 
--- Standard   : VHDL'87
--------------------------------------------------------------------------------
--- Description: Controller for Wolfson WM8731 -audio codec
--------------------------------------------------------------------------------
--- Copyright (c) 2016 
--------------------------------------------------------------------------------
--- Revisions  :
--- Date         Version     Author          Description
--- 11.01.2016   1.0         nikulaj         Created
--------------------------------------------------------------------------------
-
->>>>>>> ccb6175b8115786eb041123706c469c9f98576a4
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity audio_ctrl is
-<<<<<<< HEAD
   generic(
     ref_clk_freq_g  : integer := 18432000;
     sample_rate_g   : integer := 48000;
@@ -51,36 +29,17 @@ entity audio_ctrl is
     );
       
   port(
-=======
-    generic
-    (
-    ref_clk_freq_g  : integer := 18 432 000;
-    sample_rate_g   : integer := 48 000;
-    data_width_g    : integer := 16;
-    );
-
-    port
-    (
->>>>>>> ccb6175b8115786eb041123706c469c9f98576a4
     clk             : in std_logic;
     rst_n           : in std_logic;
     left_data_in    : in std_logic_vector(data_width_g - 1 downto 0);
     right_data_in   : in std_logic_vector(data_width_g - 1 downto 0);
-<<<<<<< HEAD
     aud_bclk_out    : out std_logic;
     aud_data_out    : out std_logic;
     aud_lrclk_out   : out std_logic
-=======
-
-    aud_bclk_out    : out std_logic;
-    aud_data_out    : out std_logic;
-    aud_lrclk_out   : out std_logic;
->>>>>>> ccb6175b8115786eb041123706c469c9f98576a4
     );
 end audio_ctrl;
 
 architecture rtl of audio_ctrl is
-<<<<<<< HEAD
   constant fs_c           : integer := (((ref_clk_freq_g / sample_rate_g) / data_width_g) / 2) - 1;
   constant lr_c           : integer := (data_width_g * 2) - 1;
   constant clk_c_width_c  : integer := 16;
@@ -148,9 +107,3 @@ begin --rtl
 end rtl;
   
   
-=======
--- signal declarations go here
-begin
--- logic goes here
-end rtl;
->>>>>>> ccb6175b8115786eb041123706c469c9f98576a4
