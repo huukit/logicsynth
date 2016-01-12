@@ -3,19 +3,20 @@
 -- Project    :
 -------------------------------------------------------------------------------
 -- File       : audio_ctrl.vhd
--- Author     : Tuomas Huuki
+-- Author     : Jonas Nikula, Tuomas Huuki
 -- Company    : TUT
 -- Created    : 11.1.2016
 -- Platform   :
 -- Standard   : VHDL'93
 -------------------------------------------------------------------------------
--- Description: Eight excercise.
+-- Description: Controller for Wolfson WM8731 -audio codec
 -------------------------------------------------------------------------------
 -- Copyright (c) 2016
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 11.1.2016   1.0      tuhu    Created
+-- 11.01.2016   1.0     nikulaj Created
+-- 12.01.2015   1.1     huukit  Drafting functionality.
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -23,8 +24,8 @@ use ieee.numeric_std.all;
 
 entity audio_ctrl is
   generic(
-    ref_clk_freq_g  : integer := 18432000;
-    sample_rate_g   : integer := 48000;
+    ref_clk_freq_g  : integer := 18 4320 00;
+    sample_rate_g   : integer := 48 000;
     data_width_g    : integer := 16
     );
       
