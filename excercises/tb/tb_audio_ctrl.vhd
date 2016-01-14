@@ -29,16 +29,6 @@ end tb_audio_ctrl;
 
 architecture testbench of tb_audio_ctrl is
   
-  constant clockrate_ns_c : time := 50 ns;
-  
-  signal clk              : std_logic := '0';
-  signal rst_n            : std_logic := '0';
-  signal left_data_in_r   : std_logic_vector(data_width_g - 1 downto 0);
-  signal right_data_in_r  : std_logic_vector(data_width_g - 1 downto 0);
-  signal aud_bclk_out_r   : std_logic;
-  signal aud_data_out_r   : std_logic;
-  signal aud_lrclk_out_r  : std_logic;
-  
   component audio_ctrl is
     generic(
       ref_clk_freq_g  : integer := 18432000;
@@ -57,6 +47,33 @@ architecture testbench of tb_audio_ctrl is
     );
   end component;
   
+  component audio_codec_model is
+  generic(
+    data_width_g    : integer :=16
+  );
+  port(
+    rst_n           : in std_logic;
+    aud_data_in     : in std_logic;
+    aud_bclk_in     : in std_logic;
+    aud_lrclk_in    : in std_logic;
+    
+    value_left_out  : out std_logic_vector(data_width_g - 1 downto 0);
+    value_right_out : out std_logic_vector(data_width_g - 1 downto 0)
+  );
+  end component;
+
+  constant clockrate_ns_c : time := 50 ns;
+  
+  signal clk              : std_logic := '0';
+  signal rst_n            : std_logic := '0';
+  signal left_data_in_r   : std_logic_vector(data_width_g - 1 downto 0);
+  signal right_data_in_r  : std_logic_vector(data_width_g - 1 downto 0);
+  signal aud_bclk_out_r   : std_logic;
+  signal aud_data_out_r   : std_logic;
+  signal aud_lrclk_out_r  : std_logic;
+  signal left_data_out_r   : std_logic_vector(data_width_g - 1 downto 0);
+  signal right_data_out_r  : std_logic_vector(data_width_g - 1 downto 0);
+  
 begin -- testbench
   i_acontrol : audio_ctrl
     generic map(
@@ -65,10 +82,26 @@ begin -- testbench
     port map(
       rst_n => rst_n,
       clk => clk,
+      aud_data_out  => aud_data_out_r,
+      aud_bclk_out  => aud_bclk_out_r,
+      aud_lrclk_out => aud_lrclk_out_r,
       left_data_in => left_data_in_r,
-      right_data_in => right_data_in_r     
+      right_data_in => right_data_in_r    
     );
-     
+    
+  i_amodel : audio_codec_model 
+    generic map(
+      data_width_g => data_width_g
+    )
+    port map(
+      rst_n => rst_n,
+      aud_data_in => aud_data_out_r,
+      aud_bclk_in => aud_bclk_out_r,
+      aud_lrclk_in => aud_lrclk_out_r,
+      value_left_out => left_data_out_r,
+      value_right_out => right_data_out_r
+    );
+    
   clk <= not clk after clockrate_ns_c/2; -- Create clock pulse.
   rst_n <= '1' after clockrate_ns_c * 4; -- Reset high after 4 pulses.
   

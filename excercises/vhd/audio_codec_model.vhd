@@ -68,6 +68,7 @@ architecture rtl of audio_codec_model is
             else
               input_buffer_l_r(bit_counter_r) <= aud_data_in;
               present_state_r <= read_left;
+              bit_counter_r <= bit_counter_r - 1; 
             end if;
               
           when read_right => -- Read right channel data.
@@ -75,18 +76,22 @@ architecture rtl of audio_codec_model is
             if(bit_counter_r = 0) then -- Reset counter and change channel if we have all data.
               bit_counter_r <= (data_width_g - 1);
               present_state_r <= read_left;
+            else
+              bit_counter_r <= bit_counter_r - 1; 
             end if;
                          
           when read_left => -- Read left channel data.
             input_buffer_l_r(bit_counter_r) <= aud_data_in;
             if(bit_counter_r = 0) then -- Reset counter and change channel if we have all data.
               bit_counter_r <= (data_width_g - 1);
-              present_state_r <= read_right;              
+              present_state_r <= read_right; 
+            else
+              bit_counter_r <= bit_counter_r - 1;              
             end if;
 
         end case;
 
-      bit_counter_r <= bit_counter_r - 1;  
+       
       end if;      
     end process handle_input;
   
