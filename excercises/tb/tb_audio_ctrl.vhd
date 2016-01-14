@@ -24,8 +24,8 @@ use ieee.numeric_std.all;
 entity tb_audio_ctrl is
   generic(
     data_width_g    : integer := 16;
-    step_w_r_g      : integer := 1;
-    step_w_l_g      : integer := 4
+    step_w_r_g      : integer := 2;
+    step_w_l_g      : integer := 10
   );
 end tb_audio_ctrl;
 
@@ -82,13 +82,13 @@ architecture testbench of tb_audio_ctrl is
   signal clk              : std_logic := '0';
   signal rst_n            : std_logic := '0';
   signal sync_r           : std_logic := '0';
-  signal left_data_in_r   : std_logic_vector(data_width_g - 1 downto 0);
-  signal right_data_in_r  : std_logic_vector(data_width_g - 1 downto 0);
+  signal l_data_wg_actrl  : std_logic_vector(data_width_g - 1 downto 0);
+  signal r_data_wg_actrl  : std_logic_vector(data_width_g - 1 downto 0);
   signal aud_bclk_out_r   : std_logic;
   signal aud_data_out_r   : std_logic;
   signal aud_lrclk_out_r  : std_logic;
-  signal left_data_out_r   : std_logic_vector(data_width_g - 1 downto 0);
-  signal right_data_out_r  : std_logic_vector(data_width_g - 1 downto 0);
+  signal l_data_codec_tb  : std_logic_vector(data_width_g - 1 downto 0);
+  signal r_data_codec_tb  : std_logic_vector(data_width_g - 1 downto 0);
   
 begin -- testbench
   i_acontrol : audio_ctrl
@@ -101,8 +101,8 @@ begin -- testbench
       aud_data_out  => aud_data_out_r,
       aud_bclk_out  => aud_bclk_out_r,
       aud_lrclk_out => aud_lrclk_out_r,
-      left_data_in => left_data_in_r,
-      right_data_in => right_data_in_r    
+      left_data_in => l_data_wg_actrl,
+      right_data_in => r_data_wg_actrl    
     );
     
   i_amodel : audio_codec_model 
@@ -114,8 +114,8 @@ begin -- testbench
       aud_data_in => aud_data_out_r,
       aud_bclk_in => aud_bclk_out_r,
       aud_lrclk_in => aud_lrclk_out_r,
-      value_left_out => left_data_out_r,
-      value_right_out => right_data_out_r
+      value_left_out => l_data_codec_tb ,
+      value_right_out => r_data_codec_tb 
     );
   
   i_wavegen_left : wave_gen
@@ -127,7 +127,7 @@ begin -- testbench
       clk => clk,
       rst_n => rst_n,
       sync_clear_in => sync_r,
-      value_out => left_data_in_r
+      value_out => l_data_wg_actrl
     ); 
     
   i_wavegen_right : wave_gen
@@ -139,11 +139,12 @@ begin -- testbench
       clk => clk,
       rst_n => rst_n,
       sync_clear_in => sync_r,
-      value_out => right_data_in_r
+      value_out => r_data_wg_actrl
     ); 
     
   clk <= not clk after clockrate_ns_c/2; -- Create clock pulse.
   rst_n <= '1' after clockrate_ns_c * 4; -- Reset high after 4 pulses.
+  sync_r <= '1' after 1 ms;
   
   data_generator : process(clk, rst_n)
   begin
