@@ -42,6 +42,7 @@ architecture rtl of audio_codec_model is
   signal present_state_r  : state_type;
 
   signal bit_counter_r    : integer;
+  signal input_buffer_r   : std_logic_vector(data_width_g - 1 downto 0); 
   signal input_buffer_l_r : std_logic_vector(data_width_g - 1 downto 0); 
   signal input_buffer_r_r : std_logic_vector(data_width_g - 1 downto 0); 
   
@@ -55,38 +56,45 @@ architecture rtl of audio_codec_model is
       if(rst_n = '0') then -- Reset state and output registers.
         present_state_r <= wait_for_input;
         bit_counter_r <= (data_width_g - 1);
-        input_buffer_r_r <= (others => '0');
         input_buffer_l_r <= (others => '0');
+        input_buffer_r_r <= (others => '0');
       elsif(aud_bclk_in'event and aud_bclk_in = '1') then -- Read input on bclk rising edge.
         
         case present_state_r is -- Handle init and other states.
           
           when wait_for_input => -- First input data, look for direction.
+            input_buffer_r(bit_counter_r) <= aud_data_in;
             if(aud_lrclk_in = '0') then
-              input_buffer_r_r(bit_counter_r) <= aud_data_in;
+              --input_buffer_r_r(bit_counter_r) <= aud_data_in;
               present_state_r <= read_right;
             else
-              input_buffer_l_r(bit_counter_r) <= aud_data_in;
+              --input_buffer_l_r(bit_counter_r) <= aud_data_in;
               present_state_r <= read_left;
-              bit_counter_r <= bit_counter_r - 1; 
             end if;
-              
+            bit_counter_r <= bit_counter_r - 1; 
+            
           when read_right => -- Read right channel data.
-            input_buffer_r_r(bit_counter_r) <= aud_data_in;
+            --input_buffer_r_r(bit_counter_r) <= aud_data_in;
             if(bit_counter_r = 0) then -- Reset counter and change channel if we have all data.
+              input_buffer_r_r(bit_counter_r) <= aud_data_in;
+              input_buffer_r_r(data_width_g - 1 downto 1) <= input_buffer_r(data_width_g - 1 downto 1);
               bit_counter_r <= (data_width_g - 1);
               present_state_r <= read_left;
             else
+              input_buffer_r(bit_counter_r) <= aud_data_in;
               bit_counter_r <= bit_counter_r - 1; 
             end if;
                          
           when read_left => -- Read left channel data.
-            input_buffer_l_r(bit_counter_r) <= aud_data_in;
+            --input_buffer_l_r(bit_counter_r) <= aud_data_in;
             if(bit_counter_r = 0) then -- Reset counter and change channel if we have all data.
+              input_buffer_l_r(bit_counter_r) <= aud_data_in;
+              input_buffer_l_r(data_width_g - 1 downto 1) <= input_buffer_r(data_width_g - 1 downto 1);
               bit_counter_r <= (data_width_g - 1);
               present_state_r <= read_right; 
             else
-              bit_counter_r <= bit_counter_r - 1;              
+              input_buffer_r(bit_counter_r) <= aud_data_in;
+              bit_counter_r <= bit_counter_r - 1;             
             end if;
 
         end case;
