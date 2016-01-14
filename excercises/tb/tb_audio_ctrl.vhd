@@ -23,7 +23,9 @@ use ieee.numeric_std.all;
 
 entity tb_audio_ctrl is
   generic(
-    data_width_g    : integer := 16
+    data_width_g    : integer := 16;
+    step_w_r_g      : integer := 1;
+    step_w_l_g      : integer := 4
   );
 end tb_audio_ctrl;
 
@@ -33,7 +35,7 @@ architecture testbench of tb_audio_ctrl is
     generic(
       ref_clk_freq_g  : integer := 18432000;
       sample_rate_g   : integer := 48000;
-      data_width_g    : integer := 16
+      data_width_g    : integer
     );
     
     port(
@@ -49,7 +51,7 @@ architecture testbench of tb_audio_ctrl is
   
   component audio_codec_model is
   generic(
-    data_width_g    : integer :=16
+    data_width_g    : integer
   );
   port(
     rst_n           : in std_logic;
@@ -62,10 +64,24 @@ architecture testbench of tb_audio_ctrl is
   );
   end component;
 
+  component wave_gen is 
+  generic (
+    width_g             : integer;
+    step_g              : integer := 1 
+  );
+  port(
+    clk                 : in std_logic; 
+    rst_n               : in std_logic; 
+    sync_clear_in       : in std_logic; 
+    value_out           : out std_logic_vector(width_g - 1 downto 0)
+  );
+  end component;
+  
   constant clockrate_ns_c : time := 50 ns;
   
   signal clk              : std_logic := '0';
   signal rst_n            : std_logic := '0';
+  signal sync_r           : std_logic := '0';
   signal left_data_in_r   : std_logic_vector(data_width_g - 1 downto 0);
   signal right_data_in_r  : std_logic_vector(data_width_g - 1 downto 0);
   signal aud_bclk_out_r   : std_logic;
@@ -101,6 +117,30 @@ begin -- testbench
       value_left_out => left_data_out_r,
       value_right_out => right_data_out_r
     );
+  
+  i_wavegen_left : wave_gen
+    generic map(
+      width_g => data_width_g,
+      step_g => step_w_l_g
+    )
+    port map(
+      clk => clk,
+      rst_n => rst_n,
+      sync_clear_in => sync_r,
+      value_out => left_data_in_r
+    ); 
+    
+  i_wavegen_right : wave_gen
+    generic map(
+      width_g => data_width_g,
+      step_g => step_w_r_g
+    )
+    port map(
+      clk => clk,
+      rst_n => rst_n,
+      sync_clear_in => sync_r,
+      value_out => right_data_in_r
+    ); 
     
   clk <= not clk after clockrate_ns_c/2; -- Create clock pulse.
   rst_n <= '1' after clockrate_ns_c * 4; -- Reset high after 4 pulses.
@@ -108,8 +148,7 @@ begin -- testbench
   data_generator : process(clk, rst_n)
   begin
     if(rst_n = '0') then
-      left_data_in_r <= std_logic_vector(to_unsigned(21845, left_data_in_r'length));
-      right_data_in_r <= std_logic_vector(to_unsigned(43690, right_data_in_r'length));
+      -- Reset registers ..
     elsif(clk'event and clk = '1') then
       -- Generate data ..
     end if;
