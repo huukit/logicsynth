@@ -29,7 +29,7 @@ end tb_audio_ctrl;
 
 architecture testbench of tb_audio_ctrl is
   
-  constant clockrate_ns_c : time := 54 ns;
+  constant clockrate_ns_c : time := 50 ns;
   
   signal clk              : std_logic := '0';
   signal rst_n            : std_logic := '0';

@@ -1,0 +1,13 @@
+* As the sampling rate is 48kHz and we need to transfer 2 * 16bit samples for each clock 
+(as in the datasheet: 1/fs) the bit clock rate is fs * 32 = 1,536Mhz and the lr clock
+logically double that of the sampling rate (48kHz * channels).
+
+* Clocks are defined as follows:
+constant fs_c           : integer := (((ref_clk_freq_g / sample_rate_g) / data_width_g) / 4) - 1;
+constant lr_c           : integer := (data_width_g * 2) - 1;
+Note: lr_c has a multiplier of 2 so that it can be sychronized with the mein clock.
+
+* There are 2 processes. The first process generates the bit- and lr-clocks and the second process
+loads a snapshot of the channels at the beginning of each sequence and the sequentially loads the new
+data to the output register. Both counters start from the maximum value and count down. This allows
+us to use the counter registers for going through data bit by bit.
