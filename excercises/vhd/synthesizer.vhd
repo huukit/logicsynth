@@ -92,8 +92,18 @@ architecture rtl of synthesizer is
     end component;
 
     signal adder_input_r    : std_logic_vector((data_width_g * n_keys_g)-1 downto 0);
+    signal adder_output_r   : std_logic_vector(data_width_g - 1 downto 0);
+
+    signal aud_bclk_r    : std_logic;
+    signal aud_data_r    : std_logic;
+    signal aud_lrclk_r   : std_logic;
 
 begin -- rtl
+    -- registers to outputs
+    aud_bclk_out <= aud_lrclk_r;
+    aud_data_out <= aud_data_r;
+    aud_lrclk_out <= aud_lrclk_r;
+
     wave_generators:
     for I in 0 to n_keys_g - 1 generate
         wavegen_arr : wave_gen
@@ -111,6 +121,36 @@ begin -- rtl
         );
     end generate wave_generators;
 
-    i_adder:
+    i_adder : multi_port_adder
+    generic map
+    (
+        operand_width_g => data_width_g,
+        num_of_operands_g => n_keys_g
+    )
+    port map
+    (
+        clk => clk,
+        rst_n => clk,
+        operands_in => adder_input_r,
+        sum_out => adder_output_r
+    );
+
+    i_audio_ctrl : audio_ctrl
+    generic map
+    (
+       ref_clk_freq_g => clk_freq_g,
+       sample_rate_g => sample_rate_g,
+       data_width_g => data_width_g
+    )
+    port map
+    (
+        clk => clk,
+        rst_n => rst_n,
+        left_data_in => adder_output_r,
+        right_data_in => adder_output_r,
+        aud_bclk_out => aud_bclk_r,
+        aud_data_out => aud_data_r,
+        aud_lrclk_out => aud_lrclk_r
+    );
 
 end rtl;
