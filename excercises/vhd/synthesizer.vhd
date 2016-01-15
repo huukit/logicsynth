@@ -24,10 +24,10 @@ use ieee.numeric_std.all;
 entity synthesizer is 
     generic
     (
-    clk_freq_g      : integer 18432000;
-    sample_rate_g   : integer 48000;
-    data_width_g    : integer 16;
-    n_keys_g        : integer 4
+    clk_freq_g      : integer := 18432000;
+    sample_rate_g   : integer := 48000;
+    data_width_g    : integer := 16;
+    n_keys_g        : integer := 4
     );
 
     port
@@ -69,7 +69,7 @@ architecture rtl of synthesizer is
             rst_n       : in std_logic; -- Reset, active low.
             operands_in : in std_logic_vector((operand_width_g * num_of_operands_g) - 1 downto 0); -- Operand inputs
             sum_out     : out std_logic_vector(operand_width_g - 1 downto 0) -- Calculation result.
-        )
+        );
     end component;
 
     component audio_ctrl is
@@ -90,5 +90,26 @@ architecture rtl of synthesizer is
             aud_lrclk_out   : out std_logic         -- Audio bitclock L/R select.
         );
     end component;
+
+    signal adder_input_r    : std_logic_vector((data_width_g * n_keys_g)-1 downto 0);
+
 begin -- rtl
+    wave_generators:
+    for I in 0 to n_keys_g - 1 generate
+        wavegen_arr : wave_gen
+        generic map
+        (
+            width_g => data_width_g,
+            step_g => 2**I
+        )
+        port map
+        (
+            clk => clk,
+            rst_n => rst_n,
+            sync_clear_in => keys_in(I),
+            value_out => adder_input_r((I+1)*data_width_g - 1 downto I*data_width_g)
+        );
+    end generate wave_generators;
+
+
 end rtl;
