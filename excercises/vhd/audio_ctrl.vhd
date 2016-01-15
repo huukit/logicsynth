@@ -105,8 +105,10 @@ begin --rtl
     
       if(lr_count_r = lr_c and  bclk_count_r = fs_c) then -- Store and load.
         aud_data_r <= left_data_in(to_integer(lr_count_r / 2)); -- Load first bit.
-        left_data_ss_r <= left_data_in; -- Store snapshots.
-        right_data_ss_r <= right_data_in;  
+        if(lr_r = '1') then -- Only store snapshot on SOF.
+          left_data_ss_r <= left_data_in; -- Store snapshots.
+          right_data_ss_r <= right_data_in;  
+        end if;
       elsif(bclk_r = '0' and bclk_count_r = (fs_c - 1)) then -- Load next bit(s).
       
         if(lr_r = '1') then -- load left data.

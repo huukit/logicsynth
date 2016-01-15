@@ -187,10 +187,10 @@ begin -- testbench
         bitcounter_r <= bitcounter_r - 1;
       elsif(bitcounter_r = 0) then
        	bitcounter_r <= bc_time;
-       	--assert (l_data_expected_r = l_data_codec_tb) report "Mismatch in left input/output data" severity failure;
-        --assert (r_data_expected_r = r_data_codec_tb) report "Mismatch in right input/output data" severity failure;
-      elsif(sync_r = '1') then
-        	bitcounter_r <= bc_time;
+       	if(sync_r = '1') then
+       	  assert (l_data_expected_r = l_data_codec_tb) report "Mismatch in left input/output data" severity failure;
+          assert (r_data_expected_r = r_data_codec_tb) report "Mismatch in right input/output data" severity failure;
+        end if;
    	  else
         bitcounter_r <= bitcounter_r - 1;
       end if;    
