@@ -111,5 +111,6 @@ begin -- rtl
         );
     end generate wave_generators;
 
+    i_adder:
 
 end rtl;
