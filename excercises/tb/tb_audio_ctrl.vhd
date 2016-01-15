@@ -15,12 +15,14 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 11.1.2016   1.0      tuhu    Created
+-- 11.1.2016   1.0      huukit  Created.
+-- 15.1.2016   1.1      huukit  Added bonus feature.
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- Test bench entity.
 entity tb_audio_ctrl is
   generic(
     data_width_g    : integer := 16;
@@ -33,6 +35,7 @@ end tb_audio_ctrl;
 
 architecture testbench of tb_audio_ctrl is
   
+  -- Component definitions.
   component audio_ctrl is
     generic(
       ref_clk_freq_g  : integer := 18432000;
@@ -79,29 +82,32 @@ architecture testbench of tb_audio_ctrl is
   );
   end component;
   
+  -- Clock rate of simulation ~50 is ok.
   constant clockrate_ns_c : time := 50 ns;
   
-  signal clk                : std_logic := '0';
-  signal rst_n              : std_logic := '0';
-  signal sync_r             : std_logic := '0';
-  signal l_data_wg_actrl    : std_logic_vector(data_width_g - 1 downto 0);
-  signal r_data_wg_actrl    : std_logic_vector(data_width_g - 1 downto 0);
-  signal aud_bclk_out_r     : std_logic;
-  signal aud_data_out_r     : std_logic;
-  signal aud_lrclk_out_r    : std_logic;
-  signal l_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0);
-  signal r_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0);
+  signal clk                : std_logic := '0'; -- Main clock.
+  signal rst_n              : std_logic := '0'; -- Main reset.
+  signal sync_r             : std_logic := '0'; -- Sync signal for generators.
+  signal l_data_wg_actrl    : std_logic_vector(data_width_g - 1 downto 0); -- Generator output.
+  signal r_data_wg_actrl    : std_logic_vector(data_width_g - 1 downto 0); -- Generator output.
+  signal aud_bclk_out_r     : std_logic; -- Codec serial bitclock.
+  signal aud_data_out_r     : std_logic; -- Codec serial data output.
+  signal aud_lrclk_out_r    : std_logic; -- Codec serial L/R data output.
+  signal l_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0); -- Model output.
+  signal r_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0); -- Model output.
   
   constant fs_c             : integer := (((ref_clk_freq_g / sample_rate_g) / data_width_g) / 4);
   constant bc_time          : integer := fs_c  * 2 * (data_width_g * 2) - 1;
-  signal l_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0);
-  signal r_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0);
-  signal bitcounter_r       : integer;
+  signal l_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0); -- Expected output from model.
+  signal r_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0); -- Expected output from model.
+  signal bitcounter_r       : integer; -- Bitcounter for codec output analysis.
   
-  signal checkdelay_r       : integer;
-  constant cdelay           : integer  := 1;
+  signal checkdelay_r       : integer; -- Delay counter to check the sync input effect.
+  constant cdelay           : integer  := 1; -- Delay time for previous in main clock cycles.
   
 begin -- testbench
+
+  -- Instances
   i_acontrol : audio_ctrl
     generic map(
       data_width_g => data_width_g
@@ -153,16 +159,18 @@ begin -- testbench
       value_out => r_data_wg_actrl
     ); 
     
+  -- Clock, reset and sync generation.
   clk <= not clk after clockrate_ns_c/2; -- Create clock pulse.
   rst_n <= '1' after clockrate_ns_c * 4; -- Reset high after 4 pulses.
-  sync_r <= not sync_r after 100 us;
+  sync_r <= not sync_r after 500 us;     -- Note: I wish testbenches had a pseudo random number generator..
   
+  -- Check generator sync behavior.
   check_generators : process(clk, rst_n)
   begin
     if(rst_n = '0') then
       -- Reset registers ..
     elsif(clk'event and clk = '1') then
-      if(sync_r = '1') then -- If sync is 1 and generators are producing output.
+      if(sync_r = '1') then -- If sync is 1 we should have no output after 1 cycle.
         if(checkdelay_r = cdelay) then
           assert (signed(l_data_wg_actrl) = 0) report "Wave gen active on sync = 1" severity failure;
           assert (signed(r_data_wg_actrl) = 0) report "Wave gen active on sync = 1" severity failure;
@@ -175,25 +183,29 @@ begin -- testbench
     end if;
   end process check_generators;
   
+  -- Check codec output from model.
   data_checker : process(clk, rst_n)
   begin
     if(rst_n = '0') then
       --Reset registers ..
+      l_data_expected_r <= (others => '0');
+      r_data_expected_r <= (others => '0');
       bitcounter_r <= bc_time;
     elsif(clk'event and clk = '1') then
-      if(bitcounter_r = bc_time) then
+      if(bitcounter_r = bc_time) then -- Store a snapshot locally when the codecs start.
         l_data_expected_r <= l_data_wg_actrl;
         r_data_expected_r <= r_data_wg_actrl;
         bitcounter_r <= bitcounter_r - 1;
-      elsif(bitcounter_r = 0) then
-       	bitcounter_r <= bc_time;
-       	if(sync_r = '1') then
+      elsif(bitcounter_r = 0) then -- When we reach zero check the output ..
+       	if(sync_r = '1') then -- .. assuming we have output .. 
        	  assert (l_data_expected_r = l_data_codec_tb) report "Mismatch in left input/output data" severity failure;
           assert (r_data_expected_r = r_data_codec_tb) report "Mismatch in right input/output data" severity failure;
         end if;
+       	bitcounter_r <= bc_time; -- .. and reset the counter to keep it in sync with the codec ..
    	  else
-        bitcounter_r <= bitcounter_r - 1;
+        bitcounter_r <= bitcounter_r - 1; -- Inrement counter (see previous explanation).
       end if;    
     end if;
     end process data_checker;
+    
 end testbench;

@@ -16,7 +16,8 @@
 -- Revisions  :
 -- Date        Version  Author  Description
 -- 11.01.2016   1.0     nikulaj Created
--- 12.01.2015   1.1     huukit  Drafting functionality.
+-- 12.01.2016   1.1     huukit  Drafting functionality.
+-- 15.01.2016   1.2     huukit  Fixed a bug where the snapshot was incorrectly updated.
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
