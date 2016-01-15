@@ -79,16 +79,23 @@ architecture testbench of tb_audio_ctrl is
   
   constant clockrate_ns_c : time := 50 ns;
   
-  signal clk              : std_logic := '0';
-  signal rst_n            : std_logic := '0';
-  signal sync_r           : std_logic := '0';
-  signal l_data_wg_actrl  : std_logic_vector(data_width_g - 1 downto 0);
-  signal r_data_wg_actrl  : std_logic_vector(data_width_g - 1 downto 0);
-  signal aud_bclk_out_r   : std_logic;
-  signal aud_data_out_r   : std_logic;
-  signal aud_lrclk_out_r  : std_logic;
-  signal l_data_codec_tb  : std_logic_vector(data_width_g - 1 downto 0);
-  signal r_data_codec_tb  : std_logic_vector(data_width_g - 1 downto 0);
+  signal clk                : std_logic := '0';
+  signal rst_n              : std_logic := '0';
+  signal sync_r             : std_logic := '0';
+  signal l_data_wg_actrl    : std_logic_vector(data_width_g - 1 downto 0);
+  signal r_data_wg_actrl    : std_logic_vector(data_width_g - 1 downto 0);
+  signal aud_bclk_out_r     : std_logic;
+  signal aud_data_out_r     : std_logic;
+  signal aud_lrclk_out_r    : std_logic;
+  signal l_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0);
+  signal r_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0);
+  
+  signal l_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0);
+  signal r_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0);
+  signal bitcounter_r       : integer;
+  
+  signal checkdelay_r       : integer;
+  constant cdelay           : integer  := 1;
   
 begin -- testbench
   i_acontrol : audio_ctrl
@@ -144,15 +151,45 @@ begin -- testbench
     
   clk <= not clk after clockrate_ns_c/2; -- Create clock pulse.
   rst_n <= '1' after clockrate_ns_c * 4; -- Reset high after 4 pulses.
-  sync_r <= '1' after 1 ms;
+  sync_r <= not sync_r after 100 us;
   
-  data_generator : process(clk, rst_n)
+  check_generators : process(clk, rst_n)
   begin
     if(rst_n = '0') then
       -- Reset registers ..
     elsif(clk'event and clk = '1') then
-      -- Generate data ..
+      if(sync_r = '1') then -- If sync is 1 and generators are producing output.
+        if(checkdelay_r = cdelay) then
+          assert (signed(l_data_wg_actrl) = 0) report "Wave gen active on sync = 1" severity failure;
+          assert (signed(r_data_wg_actrl) = 0) report "Wave gen active on sync = 1" severity failure;
+        else
+          checkdelay_r <= checkdelay_r + 1;
+        end if;
+      else
+        checkdelay_r <= 0;
+      end if;
     end if;
-  end process data_generator;
+  end process check_generators;
   
+  data_checker : process(clk, rst_n)
+  begin
+    if(rst_n = '0') then
+      --Reset registers ..
+      bitcounter_r <= data_width_g - 1;
+    elsif(aud_bclk_out_r'event and aud_bclk_out_r = '0') then
+      if(bitcounter_r = data_width_g - 1) then
+        l_data_expected_r <= l_data_wg_actrl;
+        r_data_expected_r <= r_data_wg_actrl;
+        bitcounter_r <= bitcounter_r - 1;
+      elsif(bitcounter_r = 0) then
+       	bitcounter_r <= data_width_g;
+       	--assert (l_data_expected_r = l_data_codec_tb) report "Mismatch in left input/output data" severity failure;
+        --assert (r_data_expected_r = r_data_codec_tb) report "Mismatch in right input/output data" severity failure;
+      elsif(sync_r = '1') then
+        	bitcounter_r <= data_width_g;
+   	  else
+        bitcounter_r <= bitcounter_r - 1;
+      end if;    
+    end if;
+    end process data_checker;
 end testbench;
