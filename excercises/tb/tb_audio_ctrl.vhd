@@ -25,7 +25,9 @@ entity tb_audio_ctrl is
   generic(
     data_width_g    : integer := 16;
     step_w_r_g      : integer := 2;
-    step_w_l_g      : integer := 10
+    step_w_l_g      : integer := 10;
+    ref_clk_freq_g  : integer := 18432000;
+    sample_rate_g   : integer := 48000
   );
 end tb_audio_ctrl;
 
@@ -90,6 +92,8 @@ architecture testbench of tb_audio_ctrl is
   signal l_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0);
   signal r_data_codec_tb    : std_logic_vector(data_width_g - 1 downto 0);
   
+  constant fs_c             : integer := (((ref_clk_freq_g / sample_rate_g) / data_width_g) / 4);
+  constant bc_time          : integer := fs_c  * 2 * (data_width_g * 2) - 1;
   signal l_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0);
   signal r_data_expected_r  : std_logic_vector(data_width_g - 1 downto 0);
   signal bitcounter_r       : integer;
@@ -175,18 +179,18 @@ begin -- testbench
   begin
     if(rst_n = '0') then
       --Reset registers ..
-      bitcounter_r <= data_width_g - 1;
-    elsif(aud_bclk_out_r'event and aud_bclk_out_r = '0') then
-      if(bitcounter_r = data_width_g - 1) then
+      bitcounter_r <= bc_time;
+    elsif(clk'event and clk = '1') then
+      if(bitcounter_r = bc_time) then
         l_data_expected_r <= l_data_wg_actrl;
         r_data_expected_r <= r_data_wg_actrl;
         bitcounter_r <= bitcounter_r - 1;
       elsif(bitcounter_r = 0) then
-       	bitcounter_r <= data_width_g;
+       	bitcounter_r <= bc_time;
        	--assert (l_data_expected_r = l_data_codec_tb) report "Mismatch in left input/output data" severity failure;
         --assert (r_data_expected_r = r_data_codec_tb) report "Mismatch in right input/output data" severity failure;
       elsif(sync_r = '1') then
-        	bitcounter_r <= data_width_g;
+        	bitcounter_r <= bc_time;
    	  else
         bitcounter_r <= bitcounter_r - 1;
       end if;    
