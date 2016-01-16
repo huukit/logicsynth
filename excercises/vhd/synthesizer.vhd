@@ -91,7 +91,7 @@ architecture rtl of synthesizer is
         );
     end component;
 
-    signal adder_input_r    : std_logic_vector((data_width_g * n_keys_g)-1 downto 0);
+    signal adder_input_r    : std_logic_vector((data_width_g * n_keys_g) - 1 downto 0);
     signal adder_output_r   : std_logic_vector(data_width_g - 1 downto 0);
 
     signal aud_bclk_r    : std_logic;
@@ -130,7 +130,7 @@ begin -- rtl
     port map
     (
         clk => clk,
-        rst_n => clk,
+        rst_n => rst_n,
         operands_in => adder_input_r,
         sum_out => adder_output_r
     );
