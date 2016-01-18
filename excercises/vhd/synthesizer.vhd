@@ -60,10 +60,10 @@ architecture rtl of synthesizer is
             num_of_operands_g   : integer := 4
         );
         port(
-            clk         : in std_logic; -- Clock signal.
-            rst_n       : in std_logic; -- Reset, active low.
-            operands_in : in std_logic_vector((operand_width_g * num_of_operands_g) - 1 downto 0); -- Operand inputs
-            sum_out     : out std_logic_vector(operand_width_g - 1 downto 0) -- Calculation result.
+            clk             : in std_logic; -- Clock signal.
+            rst_n           : in std_logic; -- Reset, active low.
+            operands_in     : in std_logic_vector((operand_width_g * num_of_operands_g) - 1 downto 0); -- Operand inputs
+            sum_out         : out std_logic_vector(operand_width_g - 1 downto 0) -- Calculation result.
         );
     end component;
 
@@ -84,18 +84,36 @@ architecture rtl of synthesizer is
         );
     end component;
 
+    type wavegen_output_arr is array (0 to n_keys_g - 1)
+    of std_logic_vector(data_width_g - 1 downto 0);
+
+    signal wavegen_output_r : wavegen_output_arr;
     signal adder_input_r    : std_logic_vector((data_width_g * n_keys_g) - 1 downto 0);
     signal adder_output_r   : std_logic_vector(data_width_g - 1 downto 0);
 
-    signal aud_bclk_r    : std_logic;
-    signal aud_data_r    : std_logic;
-    signal aud_lrclk_r   : std_logic;
+    signal aud_bclk_r       : std_logic;
+    signal aud_data_r       : std_logic;
+    signal aud_lrclk_r      : std_logic;
 
 begin -- rtl
       -- registers to outputs
     aud_bclk_out <= aud_bclk_r;
     aud_data_out <= aud_data_r;
     aud_lrclk_out <= aud_lrclk_r;
+
+    waveform_scaling : process(clk, rst_n)
+        variable temp : integer := 0;
+    begin
+        if(rst_n = '0') then -- Reset
+            -- wavegen_output_r <= (others => '0');
+        elsif(clk'event and clk = '1') then -- Calculate on rising edge of clock.
+            for I in 0 to n_keys_g - 1 loop
+                temp := to_integer(signed(wavegen_output_r(I)));
+                temp := temp / 2;
+                adder_input_r((I+1)*data_width_g - 1 downto I*data_width_g) <= std_logic_vector(to_signed(temp, wavegen_output_r(I)'length));
+            end loop;
+        end if;
+    end process waveform_scaling;
 
     wave_generators:
     for I in 0 to n_keys_g - 1 generate
@@ -110,8 +128,9 @@ begin -- rtl
             clk => clk,
             rst_n => rst_n,
             sync_clear_in => keys_in(I),
-            value_out => adder_input_r((I+1)*data_width_g - 1 downto I*data_width_g)
+            value_out => wavegen_output_r(I)
         );
+    -- adder_input_r((I+1)*data_width_g - 1 downto I*data_width_g) <= wavegen_output_r(I);
     end generate wave_generators;
 
     i_adder : multi_port_adder

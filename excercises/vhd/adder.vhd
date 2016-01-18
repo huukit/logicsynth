@@ -30,11 +30,11 @@ entity adder is
   );
     
   port(
-    clk : in std_logic;                                       -- Clock signal.
-    rst_n :in std_logic;                                      -- Reset, active low.
-    a_in : in std_logic_vector(operand_width_g - 1 downto 0); -- Input a.
-    b_in : in std_logic_vector(operand_width_g - 1 downto 0); -- Input b.
-    sum_out : out std_logic_vector(operand_width_g downto 0)  -- Sum output.
+    clk     : in std_logic;                                         -- Clock signal.
+    rst_n   : in std_logic;                                         -- Reset, active low.
+    a_in    : in std_logic_vector(operand_width_g - 1 downto 0);    -- Input a.
+    b_in    : in std_logic_vector(operand_width_g - 1 downto 0);    -- Input b.
+    sum_out : out std_logic_vector(operand_width_g downto 0)        -- Sum output.
   );
     
 end adder;
