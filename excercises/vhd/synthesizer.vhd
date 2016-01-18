@@ -22,34 +22,31 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity synthesizer is 
-    generic
-    (
-    clk_freq_g      : integer := 18432000;
-    sample_rate_g   : integer := 48000;
-    data_width_g    : integer := 16;
-    n_keys_g        : integer := 4
+    generic(
+        clk_freq_g      : integer := 18432000;
+        sample_rate_g   : integer := 48000;
+        data_width_g    : integer := 16;
+        n_keys_g        : integer := 4
     );
 
-    port
-    (
-    clk               : in std_logic;
-    rst_n             : in std_logic;
-    keys_in           : in std_logic_vector(n_keys_g - 1 downto 0);
-    aud_bclk_out      : out std_logic;
-    aud_data_out      : out std_logic;
-    aud_lrclk_out     : out std_logic
+    port(
+        clk               : in std_logic;
+        rst_n             : in std_logic;
+        keys_in           : in std_logic_vector(n_keys_g - 1 downto 0);
+        aud_bclk_out      : out std_logic;
+        aud_data_out      : out std_logic;
+        aud_lrclk_out     : out std_logic
     );
 end synthesizer;
 
 architecture rtl of synthesizer is
+
     component wave_gen is
-        generic
-        (
+        generic(
             width_g             : integer; -- Width of the generated wave in bits.
-            step_g              : integer -- Width of one step.
+            step_g              : integer  -- Width of one step.
         );
-        port
-        (
+        port(
             clk                 : in std_logic; -- Clock signal.
             rst_n               : in std_logic; -- Reset, actove low.
             sync_clear_in       : in std_logic; -- Sync bit input to clear the counter.
@@ -58,13 +55,11 @@ architecture rtl of synthesizer is
     end component;
 
     component multi_port_adder is
-        generic
-        (
+        generic(
             operand_width_g     : integer := 16; -- Specify default value for both.
             num_of_operands_g   : integer := 4
         );
-        port
-        (
+        port(
             clk         : in std_logic; -- Clock signal.
             rst_n       : in std_logic; -- Reset, active low.
             operands_in : in std_logic_vector((operand_width_g * num_of_operands_g) - 1 downto 0); -- Operand inputs
@@ -73,14 +68,12 @@ architecture rtl of synthesizer is
     end component;
 
     component audio_ctrl is
-        generic
-        (
+        generic(
             ref_clk_freq_g  : integer := 18432000;  -- Reference clock.
             sample_rate_g   : integer := 48000;     -- Sample clock fs.
             data_width_g    : integer := 16         -- Data width.
         );
-        port
-        (
+        port(
             clk             : in std_logic;         -- Main clock.
             rst_n           : in std_logic;         -- Reset, active low.
             left_data_in    : in std_logic_vector(data_width_g - 1 downto 0); -- Data in, left.
@@ -99,8 +92,8 @@ architecture rtl of synthesizer is
     signal aud_lrclk_r   : std_logic;
 
 begin -- rtl
-    -- registers to outputs
-    aud_bclk_out <= aud_lrclk_r;
+      -- registers to outputs
+    aud_bclk_out <= aud_bclk_r;
     aud_data_out <= aud_data_r;
     aud_lrclk_out <= aud_lrclk_r;
 
@@ -138,9 +131,9 @@ begin -- rtl
     i_audio_ctrl : audio_ctrl
     generic map
     (
-       ref_clk_freq_g => clk_freq_g,
-       sample_rate_g => sample_rate_g,
-       data_width_g => data_width_g
+        ref_clk_freq_g => clk_freq_g,
+        sample_rate_g => sample_rate_g,
+        data_width_g => data_width_g
     )
     port map
     (
