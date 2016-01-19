@@ -103,13 +103,23 @@ begin -- rtl
 
     waveform_scaling : process(clk, rst_n)
         variable temp : integer := 0;
+        variable divider : integer := 0;
     begin
-        if(rst_n = '0') then -- Reset
-            -- wavegen_output_r <= (others => '0');
-        elsif(clk'event and clk = '1') then -- Calculate on rising edge of clock.
+        if(clk'event and clk = '1' and rst_n = '1') then -- Calculate on rising edge of clock.
+            divider := 0;
+            for I in 0 to n_keys_g - 1 loop
+                if (keys_in(I) = '0') then
+                    divider := divider + 1;
+                end if;
+            end loop;
+            if (divider = 0) then
+                divider := 1;
+            elsif(divider > n_keys_g) then
+                report "Divider value: " & integer'image(divider);
+            end if;
             for I in 0 to n_keys_g - 1 loop
                 temp := to_integer(signed(wavegen_output_r(I)));
-                temp := temp / 2;
+                temp := temp / divider;
                 adder_input_r((I+1)*data_width_g - 1 downto I*data_width_g) <= std_logic_vector(to_signed(temp, wavegen_output_r(I)'length));
             end loop;
         end if;
