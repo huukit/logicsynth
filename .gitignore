@@ -38,3 +38,12 @@ work
 *Makefile
 *transcript
 *vsim.wlf
+db
+greybox_tmp
+incremental_db
+output_files
+*.bsf
+*.cmp
+*.ppf
+*.qip
+*.jdi
