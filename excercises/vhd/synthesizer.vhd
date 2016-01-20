@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- Title      : TIE-50206, Exercise 08
+-- Title      : TIE-50206, Exercise 10
 -- Project    :
 -------------------------------------------------------------------------------
 -- File       : synthesizer.vhd
@@ -16,19 +16,21 @@
 -- Revisions  :
 -- Date             Version     Author          Description
 -- 14.01.2016       1.0         nikulaj         Created
+-- 20.01.2016       1.1         nikulaj         Implement bonus feature
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity synthesizer is 
+entity synthesizer is       -- synthesizer generics and ports
+    -- generics
     generic(
         clk_freq_g      : integer := 18432000;
         sample_rate_g   : integer := 48000;
         data_width_g    : integer := 16;
         n_keys_g        : integer := 4
     );
-
+    -- ports
     port(
         clk               : in std_logic;
         rst_n             : in std_logic;
@@ -39,8 +41,7 @@ entity synthesizer is
     );
 end synthesizer;
 
-architecture rtl of synthesizer is
-
+architecture rtl of synthesizer is      -- Defining used signals and components
     component wave_gen is
         generic(
             width_g             : integer; -- Width of the generated wave in bits.
@@ -84,9 +85,12 @@ architecture rtl of synthesizer is
         );
     end component;
 
-    type wavegen_output_arr is array (0 to n_keys_g - 1)
-    of std_logic_vector(data_width_g - 1 downto 0);
+    type wavegen_output_arr is array (0 to n_keys_g - 1)    -- Define an array type to hold
+    of std_logic_vector(data_width_g - 1 downto 0);         -- wavegen output values,
+                                                            -- so they can be easily modified
+                                                            
 
+    -- registers
     signal wavegen_output_r : wavegen_output_arr;
     signal adder_input_r    : std_logic_vector((data_width_g * n_keys_g) - 1 downto 0);
     signal adder_output_r   : std_logic_vector(data_width_g - 1 downto 0);
@@ -101,23 +105,26 @@ begin -- rtl
     aud_data_out <= aud_data_r;
     aud_lrclk_out <= aud_lrclk_r;
 
+    -- a process that scales wavegen output according to how many wavegenerators
+    -- are online. If 1 is on, output is divided by 1, 2 = 2, and so on.
+    -- This prevents overflow that comes from adding two signals together.
     waveform_scaling : process(clk, rst_n)
+        -- process variables
         variable temp : integer := 0;
         variable divider : integer := 0;
     begin
+        -- Only process on clock rising edge, and when NOT in reset mode
         if(clk'event and clk = '1' and rst_n = '1') then -- Calculate on rising edge of clock.
             divider := 0;
-            for I in 0 to n_keys_g - 1 loop
+            for I in 0 to n_keys_g - 1 loop     -- calculate how many buttons are pushed
                 if (keys_in(I) = '0') then
                     divider := divider + 1;
                 end if;
             end loop;
-            if (divider = 0) then
+            if (divider = 0) then       -- failsafe to prevent div-by-0
                 divider := 1;
-            elsif(divider > n_keys_g) then
-                report "Divider value: " & integer'image(divider);
             end if;
-            for I in 0 to n_keys_g - 1 loop
+            for I in 0 to n_keys_g - 1 loop     -- modify wavegen outputs
                 temp := to_integer(signed(wavegen_output_r(I)));
                 temp := temp / divider;
                 adder_input_r((I+1)*data_width_g - 1 downto I*data_width_g) <= std_logic_vector(to_signed(temp, wavegen_output_r(I)'length));
@@ -125,6 +132,7 @@ begin -- rtl
         end if;
     end process waveform_scaling;
 
+    -- instantiate as many wave generators as needed
     wave_generators:
     for I in 0 to n_keys_g - 1 generate
         wavegen_arr : wave_gen
@@ -140,7 +148,6 @@ begin -- rtl
             sync_clear_in => keys_in(I),
             value_out => wavegen_output_r(I)
         );
-    -- adder_input_r((I+1)*data_width_g - 1 downto I*data_width_g) <= wavegen_output_r(I);
     end generate wave_generators;
 
     i_adder : multi_port_adder
