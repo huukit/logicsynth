@@ -1,0 +1,22 @@
+Total logic elements	1,450 / 33,216 ( 4 % )
+Total combinational functions	1,433 / 33,216 ( 4 % )
+Dedicated logic registers	289 / 33,216 ( < 1 % )
+Total registers	289
+Total pins	28 / 475 ( 6 % )
+
+Resources:
+dev   LUT REG LUT/REG TOT
+i2c - 45  7   58      110
+WG0 - 57  0   17      74
+WG2 - 54  0   16      73
+WG3 - 51  1   14      65
+WG4 - 47  1   13      61
+AWG -                 273
+MPA - 0   0   48      48
+AUD - 51  8   42      101
+
+Clocks
+altpll: 23,87Mhz / ~42ns
+50Mhx: 207Mhz / ~5ns
+
+Everything worked on the first go (pic added).
