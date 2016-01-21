@@ -7,20 +7,20 @@ core*
 *.ld
 *.ps
 *.eps
-*.pdf
-*.PDF
+# *.pdf
+# *.PDF
 *.bak
 *.BAK
-*.gif
-*.jpg
-*.jpeg
-*.png
+# *.gif
+# *.jpg
+# *.jpeg
+# *.png
 *.zip
 *.gz
-*.GIF
-*.JPG
-*.JPEG
-*.PNG
+# *.GIF
+# *.JPG
+# *.JPEG
+# *.PNG
 *.ZIP
 *.GZ
 *.pro.user
