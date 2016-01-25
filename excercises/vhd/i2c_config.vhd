@@ -54,9 +54,10 @@ architecture rtl of i2c_config is
     signal present_state_r      : state_type;
     signal next_state_r         : state_type;
 
-    signal bit_counter_r        : unsigned(2 downto 0) := (others => '0');
+    signal bit_counter_r        : unsigned(2 downto 0);
 
-    signal param_status_r       : unsigned(n_params_g - 1 downto 0);
+    signal status_counter_r     : unsigned(3 downto 0);
+    signal param_status_r       : std_logic_vector(n_params_g - 1 downto 0);
 
     signal temp_address_r       : std_logic_vector(7 downto 0);
     signal temp_data_r          : std_logic_vector(7 downto 0);
@@ -88,7 +89,7 @@ begin
     sclk_out <= sclk_r;
     finished_out <= finished_r;
     sdat_inout <= sdat_r;
-    param_status_out <= std_logic_vector(param_status_r);
+    param_status_out <= param_status_r;
 
     generate_sclk : process(clk, rst_n)
     begin
@@ -112,7 +113,8 @@ begin
             present_state_r <= start_condition;
             next_state_r <= start_condition;
             bit_counter_r <= to_unsigned(7, bit_counter_r'length);
-            param_status_r <= to_unsigned(0, param_status_r'length);
+            status_counter_r <= to_unsigned(0, status_counter_r'length);
+            param_status_r <= (others => '0');
 
         elsif(clk'event and clk = '1') then
 
@@ -122,8 +124,8 @@ begin
                     if(sdat_r = '1' and sclk_r = '1' and sclk_prescaler_r = prescaler_max_c / 2) then
                         sdat_r <= '0';
                         present_state_r <= address_transfer;
-                        temp_address_r <= transmission_c(to_integer(param_status_r))(15 downto 8);
-                        temp_data_r <= transmission_c(to_integer(param_status_r))(7 downto 0);
+                        temp_address_r <= transmission_c(to_integer(status_counter_r))(15 downto 8);
+                        temp_data_r <= transmission_c(to_integer(status_counter_r))(7 downto 0);
                     elsif(sdat_r = '0' or sdat_r = 'Z') then
                         sdat_r <= '1';
                     end if;
@@ -155,7 +157,8 @@ begin
                             bit_counter_r <= to_unsigned(7, 3);
                             present_state_r <= acknowledge;
                             next_state_r <= start_condition;
-                            param_status_r <= param_status_r + 1;
+                            param_status_r(to_integer(status_counter_r)) <= 1;
+                            status_counter_r <= status_counter_r + 1;
                         else
                             bit_counter_r <= bit_counter_r - 1;
                         end if;
