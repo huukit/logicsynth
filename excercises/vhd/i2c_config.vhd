@@ -45,9 +45,7 @@ architecture rtl of i2c_config is
     signal sclk_r               : std_logic;
     signal sclk_prescaler_r     : unsigned(integer(ceil(log2(real(prescaler_max_c)))) downto 0);
 
-    signal finished_r           : std_logic := '0';
-
-    signal sdat_r               : std_logic := 'Z';
+    signal sdat_r               : std_logic;
 
     type state_type is (start_condition, stop_condition,
                         acknowledge, address_transfer, data_transfer);
@@ -62,32 +60,23 @@ architecture rtl of i2c_config is
     signal temp_address_r       : std_logic_vector(7 downto 0);
     signal temp_data_r          : std_logic_vector(7 downto 0);
     type transmission_arr is array (n_params_g - 1 downto 0) of std_logic_vector(15 downto 0);
-    signal transmission_c       : transmission_arr := ( "0000000000011010",
-                                                        "0000001000011010",
-                                                        "0000010001111011",
-                                                        "0000011001111011",
-                                                        "0000100011111000",
-                                                        "0000101000000110",
-                                                        "0000110000000000",
-                                                        "0000111XXXXXXXXX",
+    signal transmission_c       : transmission_arr :=   (
+                                                        "0001001000000001",
                                                         "0001000XXXXXXXXX",
-                                                        "0001001000000001"  );
-
-    -- data_r(0) <= "0000000000011010";
-    -- data_r(1) <= "0000001000011010";
-    -- data_r(2) <= "0000010001111011";
-    -- data_r(3) <= "0000011001111011";
-    -- data_r(4) <= "0000100011111000";
-    -- data_r(5) <= "0000101000000110";
-    -- data_r(6) <= "0000110000000000";
-    -- data_r(7) <= "0000111XXXXXXXXX";
-    -- data_r(8) <= "0001000XXXXXXXXX";
-    -- data_r(9) <= "0001001000000001";
+                                                        "0000111XXXXXXXXX",
+                                                        "0000110000000000",
+                                                        "0000101000000110",
+                                                        "0000100011111000",
+                                                        "0000011001111011",
+                                                        "0000010001111011",
+                                                        "0000001000011010",
+                                                        "0000000000011010"
+                                                        );
 
 begin
 
     sclk_out <= sclk_r;
-    finished_out <= finished_r;
+    finished_out <= param_status_r(n_params_g - 1);
     sdat_inout <= sdat_r;
     param_status_out <= param_status_r;
 
@@ -126,16 +115,32 @@ begin
                         present_state_r <= address_transfer;
                         temp_address_r <= transmission_c(to_integer(status_counter_r))(15 downto 8);
                         temp_data_r <= transmission_c(to_integer(status_counter_r))(7 downto 0);
-                    elsif(sdat_r = '0' or sdat_r = 'Z') then
+                    elsif((sdat_r = '0' or sdat_r = 'Z') and sclk_prescaler_r = prescaler_max_c / 2) then
                         sdat_r <= '1';
                     end if;
 
                 when stop_condition =>
+                    if(sdat_r = '0' and sclk_r = '1' and sclk_prescaler_r = prescaler_max_c / 2) then
+                        sdat_r <= '1';
+                        param_status_r(to_integer(status_counter_r)) <= '1';
+                    elsif((sdat_r = '1' or sdat_r = 'Z') and sclk_prescaler_r = prescaler_max_c / 2) then
+                        sdat_r <= '0';
+                    elsif(sclk_prescaler_r = prescaler_max_c / 2) then
+                        sdat_r <= 'Z';
+                    end if;
 
                 when acknowledge =>
                     if(sclk_r = '0' and sclk_prescaler_r = prescaler_max_c / 2) then
+                        if(param_status_r(n_params_g - 1) = '1') then
+                            present_state_r <= stop_condition;
+                        else
+                            present_state_r <= next_state_r;
+                            if(next_state_r = start_condition) then
+                                param_status_r(to_integer(status_counter_r)) <= '1';
+                                status_counter_r <= status_counter_r + 1;
+                            end if;
+                        end if;
                         sdat_r <= 'Z';
-                        present_state_r <= next_state_r;
                     end if;
 
                 when address_transfer =>
@@ -153,12 +158,13 @@ begin
                 when data_transfer =>
                     if(sclk_r = '0' and sclk_prescaler_r = prescaler_max_c / 2) then
                         sdat_r <= temp_data_r(to_integer(bit_counter_r));
-                        if(bit_counter_r = 0) then
+                        if(bit_counter_r = 0 and status_counter_r = n_params_g - 1) then
+                            present_state_r <= acknowledge;
+                            next_state_r <= stop_condition;
+                        elsif(bit_counter_r = 0) then
                             bit_counter_r <= to_unsigned(7, 3);
                             present_state_r <= acknowledge;
                             next_state_r <= start_condition;
-                            param_status_r(to_integer(status_counter_r)) <= 1;
-                            status_counter_r <= status_counter_r + 1;
                         else
                             bit_counter_r <= bit_counter_r - 1;
                         end if;
