@@ -52,13 +52,15 @@ architecture rtl of i2c_config is
     type state_type is (start_condition, stop_condition,
                         acknowledge, address_transfer, data_transfer);
     signal present_state_r      : state_type;
+    signal next_state_r         : state_type;
 
     signal bit_counter_r        : unsigned(2 downto 0) := (others => '0');
+
+    signal param_status_r       : unsigned(n_params_g - 1 downto 0);
 
     signal temp_address_r       : std_logic_vector(7 downto 0);
     signal temp_data_r          : std_logic_vector(7 downto 0);
     type transmission_arr is array (n_params_g - 1 downto 0) of std_logic_vector(15 downto 0);
-    -- signal data_r               : data_arr;
     signal transmission_c       : transmission_arr := ( "0000000000011010",
                                                         "0000001000011010",
                                                         "0000010001111011",
@@ -86,6 +88,7 @@ begin
     sclk_out <= sclk_r;
     finished_out <= finished_r;
     sdat_inout <= sdat_r;
+    param_status_out <= std_logic_vector(param_status_r);
 
     generate_sclk : process(clk, rst_n)
     begin
@@ -107,7 +110,9 @@ begin
         if(rst_n = '0') then
             sdat_r <= 'Z';
             present_state_r <= start_condition;
-            bit_counter_r <= to_unsigned(7, 3);
+            next_state_r <= start_condition;
+            bit_counter_r <= to_unsigned(7, bit_counter_r'length);
+            param_status_r <= to_unsigned(0, param_status_r'length);
 
         elsif(clk'event and clk = '1') then
 
@@ -117,8 +122,8 @@ begin
                     if(sdat_r = '1' and sclk_r = '1' and sclk_prescaler_r = prescaler_max_c / 2) then
                         sdat_r <= '0';
                         present_state_r <= address_transfer;
-                        temp_address_r <= transmission_c(0)(15 downto 8);
-                        temp_data_r <= transmission_c(0)(7 downto 0);
+                        temp_address_r <= transmission_c(to_integer(param_status_r))(15 downto 8);
+                        temp_data_r <= transmission_c(to_integer(param_status_r))(7 downto 0);
                     elsif(sdat_r = '0' or sdat_r = 'Z') then
                         sdat_r <= '1';
                     end if;
@@ -128,7 +133,7 @@ begin
                 when acknowledge =>
                     if(sclk_r = '0' and sclk_prescaler_r = prescaler_max_c / 2) then
                         sdat_r <= 'Z';
-                        present_state_r <= data_transfer;
+                        present_state_r <= next_state_r;
                     end if;
 
                 when address_transfer =>
@@ -137,6 +142,7 @@ begin
                         if(bit_counter_r = 0) then
                             bit_counter_r <= to_unsigned(7, 3);
                             present_state_r <= acknowledge;
+                            next_state_r <= data_transfer;
                         else
                             bit_counter_r <= bit_counter_r - 1;
                         end if;
@@ -148,6 +154,8 @@ begin
                         if(bit_counter_r = 0) then
                             bit_counter_r <= to_unsigned(7, 3);
                             present_state_r <= acknowledge;
+                            next_state_r <= start_condition;
+                            param_status_r <= param_status_r + 1;
                         else
                             bit_counter_r <= bit_counter_r - 1;
                         end if;
