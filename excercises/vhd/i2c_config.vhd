@@ -118,6 +118,7 @@ begin
                         sdat_r <= '0';
                         present_state_r <= address_transfer;
                         temp_address_r <= transmission_c(0)(15 downto 8);
+                        temp_data_r <= transmission_c(0)(7 downto 0);
                     elsif(sdat_r = '0' or sdat_r = 'Z') then
                         sdat_r <= '1';
                     end if;
@@ -125,19 +126,32 @@ begin
                 when stop_condition =>
 
                 when acknowledge =>
-
-                when address_transfer =>
-                    -- if(sclk_r'event and sclk_r = '0') then
-                    if(sclk_r = '0' and sclk_prescaler_r = 0) then
-                        if(bit_counter_r = 0) then
-                            bit_counter_r <= to_unsigned(7, 3);
-                        end if;
-                        sdat_r <= temp_address_r(to_integer(bit_counter_r));
-                        bit_counter_r <= bit_counter_r - 1;
+                    if(sclk_r = '0' and sclk_prescaler_r = prescaler_max_c / 2) then
+                        sdat_r <= 'Z';
+                        present_state_r <= data_transfer;
                     end if;
 
+                when address_transfer =>
+                    if(sclk_r = '0' and sclk_prescaler_r = prescaler_max_c / 2) then
+                        sdat_r <= temp_address_r(to_integer(bit_counter_r));
+                        if(bit_counter_r = 0) then
+                            bit_counter_r <= to_unsigned(7, 3);
+                            present_state_r <= acknowledge;
+                        else
+                            bit_counter_r <= bit_counter_r - 1;
+                        end if;
+                    end if;
 
                 when data_transfer =>
+                    if(sclk_r = '0' and sclk_prescaler_r = prescaler_max_c / 2) then
+                        sdat_r <= temp_data_r(to_integer(bit_counter_r));
+                        if(bit_counter_r = 0) then
+                            bit_counter_r <= to_unsigned(7, 3);
+                            present_state_r <= acknowledge;
+                        else
+                            bit_counter_r <= bit_counter_r - 1;
+                        end if;
+                    end if;
 
             end case;
 
