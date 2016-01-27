@@ -76,6 +76,7 @@ begin
 
     sclk_out <= sclk_r;
     finished_out <= param_status_r(n_params_g - 1);
+    -- sdat_inout <= sdat_r;
     sdat_r <= sdat_inout;
     param_status_out <= param_status_r;
 
@@ -110,7 +111,7 @@ begin
 
         elsif(clk'event and clk = '1') then
             if(sclk_prescaler_r = prescaler_max_c / 2) then
-                if(sclk_r = '0') then
+                if(sclk_r = '1') then
                     present_state_r <= next_state_r;
                     if(next_state_r = acknowledge) then
                         sdat_inout <= 'Z';
@@ -140,10 +141,12 @@ begin
                             else
                                 next_state_r <= start_condition;
                             end if;
-                        elsif((sdat_inout = '1' or sdat_inout = 'Z') and sclk_r = '0') then
+                        -- elsif((sdat_inout = '1' or sdat_inout = 'Z') and sclk_r = '0') then
+                            -- sdat_inout <= '0';
+                        -- else
+                        elsif(sdat_inout = 'Z') then
                             sdat_inout <= '0';
-                        else
-                            sdat_inout <= 'Z';
+                            -- sdat_inout <= 'Z';
                         end if;
 
                     when acknowledge =>
@@ -162,12 +165,13 @@ begin
                                     param_status_r(to_integer(status_counter_r)) <= '1';
                                 else
                                     next_state_r <= data_transfer;
+                                    present_state_r <= data_transfer;
                                     bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                                     data_counter_r <= data_counter_r + 1;
                                 end if;
                             end if;
-                        else    -- sclk_r = '0'
-                            sdat_inout <= 'Z';
+                        -- else    -- sclk_r = '0'
+                            -- sdat_inout <= 'Z';
                         end if;
 
                     when data_transfer =>
