@@ -62,7 +62,7 @@ architecture rtl of i2c_config is
     signal sclk_r                   : std_logic;
     signal sclk_prescaler_r         : unsigned(integer(ceil(log2(real(prescaler_max_c)))) downto 0);
     signal present_state_r          : state_type;
-    -- signal present_state_r             : state_type;
+    signal state_after_ack_r        : state_type;
     signal bit_counter_r            : unsigned(2 downto 0);
     signal data_counter_r           : unsigned(1 downto 0);
     signal status_counter_r         : unsigned(3 downto 0);
@@ -99,7 +99,7 @@ begin
         if(rst_n = '0') then
             sdat_inout <= 'Z';
             present_state_r <= start_condition;
-            present_state_r <= start_condition;
+            state_after_ack_r <= start_condition;
             bit_counter_r <= to_unsigned(7, bit_counter_r'length);
             data_counter_r <= to_unsigned(0, data_counter_r'length);
             status_counter_r <= to_unsigned(0, status_counter_r'length);
@@ -141,23 +141,24 @@ begin
                             -- bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                             -- data_counter_r <= data_counter_r + 1;
                             if(sdat_inout = '1') then
-                                present_state_r <= start_condition;
+                                state_after_ack_r <= start_condition;
                                 bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                             elsif(sdat_inout = '0') then
                                 if(status_counter_r = n_params_g - 2) then
-                                    present_state_r <= stop_condition;
+                                    state_after_ack_r <= stop_condition;
                                 elsif(data_counter_r = 2) then -- to_unsigned(3, data_counter_r'length))
-                                    present_state_r <= start_condition;
+                                    state_after_ack_r <= start_condition;
                                     bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                                     status_counter_r <= status_counter_r + 1;
                                     param_status_r(to_integer(status_counter_r)) <= '1';
                                 else
-                                    present_state_r <= data_transfer;
+                                    state_after_ack_r <= data_transfer;
                                     bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                                     data_counter_r <= data_counter_r + 1;
                                 end if;
                             end if;
                         else    -- sclk_r = '0'
+                            present_state_r <= state_after_ack_r;
                             sdat_inout <= 'Z';
                         end if;
 
@@ -167,6 +168,7 @@ begin
                             if(bit_counter_r = 0) then
                                 bit_counter_r <= to_unsigned(7, 3);
                                 present_state_r <= acknowledge;
+                                state_after_ack_r <= acknowledge;
                             else
                                 bit_counter_r <= bit_counter_r - 1;
                             end if;
