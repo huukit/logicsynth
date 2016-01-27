@@ -19,6 +19,7 @@
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 -------------------------------------------------------------------------------
 -- Empty entity
@@ -42,6 +43,24 @@ architecture testbench of tb_i2c_config is
   -- amount of bits. 
   constant n_bytes_c       : integer := 3;
   constant bit_count_max_c : integer := 8;
+
+  -- Expected data
+    type transmission_data_arr is array (n_params_c - 1 downto 0) of std_logic_vector(15 downto 0);
+    type temp_transmission_arr is array (2 downto 0) of std_logic_vector(7 downto 0);
+    signal temp_transmission_r      : temp_transmission_arr;
+    constant codec_address_c        : std_logic_vector(7 downto 0) := "00110100";
+    constant transmission_data_c    : transmission_data_arr := (
+                                                            "0001001000000001",
+                                                            "0001000XXXXXXXXX",
+                                                            "0000111XXXXXXXXX",
+                                                            "0000110000000000",
+                                                            "0000101000000110",
+                                                            "0000100011111000",
+                                                            "0000011001111011",
+                                                            "0000010001111011",
+                                                            "0000001000011010",
+                                                            "0000000000011010"
+                                                            );
 
   -- Signals fed to the DUV
   signal clk   : std_logic := '0';  -- Remember that default values supported
@@ -73,8 +92,9 @@ architecture testbench of tb_i2c_config is
   signal sdat_r : std_logic;
 
   -- Counters for receiving bits and bytes
-  signal bit_counter_r  : integer range 0 to bit_count_max_c-1;
-  signal byte_counter_r : integer range 0 to n_bytes_c-1;
+  signal bit_counter_r      : integer range 0 to bit_count_max_c-1;
+  signal byte_counter_r     : integer range 0 to n_bytes_c-1;
+  signal status_counter_r   : integer range 0 to n_params_c-1;
 
   -- States for the FSM
   type   states is (wait_start, read_byte, send_ack, wait_stop);
@@ -163,6 +183,10 @@ begin  -- testbench
         -- Wait for the start condition
         when wait_start =>
 
+          temp_transmission_r(0) <= codec_address_c;
+          temp_transmission_r(1) <= transmission_data_c(status_counter_r)(15 downto 8);
+          temp_transmission_r(2) <= transmission_data_c(status_counter_r)(7 downto 0);
+
           -- While clk stays high, the sdat falls
           if sclk = '1' and sclk_old_r = '1' and
             sdat_old_r = '1' and sdat = '0' then
@@ -182,6 +206,9 @@ begin  -- testbench
 
               -- Normally just receive a bit
               bit_counter_r <= bit_counter_r + 1;
+
+              assert (temp_transmission_r(byte_counter_r)(7 - bit_counter_r) = sdat) report
+                "Wrong bit!" severity failure;
 
             else
 
@@ -225,6 +252,7 @@ begin  -- testbench
             sdat_old_r = '0' and sdat = '1' then
 
             curr_state_r <= wait_start;
+            status_counter_r <= status_counter_r + 1;
             
           end if;
 
