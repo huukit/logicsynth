@@ -48,8 +48,8 @@ architecture rtl of i2c_config is
     constant codec_address_c    : std_logic_vector(7 downto 0) := "00110100";
     constant transmission_data_c  : transmission_data_arr := (
                                                             "0001001000000001",
-                                                            "0001000XXXXXXXXX",
-                                                            "0000111XXXXXXXXX",
+                                                            "0001000000000010",
+                                                            "0000111000000001",
                                                             "0000110000000000",
                                                             "0000101000000110",
                                                             "0000100011111000",
