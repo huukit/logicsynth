@@ -61,7 +61,10 @@ architecture testbench of tb_i2c_config is
                                                             "0000001000011010",
                                                             "0000000000011010"
                                                             );
-  signal expected_bit_r : std_logic;
+  signal expected_bit_r     : std_logic;
+
+  constant max_wait_clks_c  : integer := 10;
+  signal clk_counter_r      : integer;
 
   -- Signals fed to the DUV
   signal clk   : std_logic := '0';  -- Remember that default values supported
@@ -145,6 +148,7 @@ begin  -- testbench
 
       byte_counter_r <= 0;
       bit_counter_r  <= 0;
+      clk_counter_r <= 0;
 
       sdat_r <= 'Z';
       
@@ -252,13 +256,19 @@ begin  -- testbench
           -- Wait for the stop condition
         when wait_stop =>
 
+          assert clk_counter_r /= max_wait_clks_c report
+          "Stop signal taking too long" severity failure;
+
           -- Stop condition detection: sdat rises while sclk stays high
           if sclk = '1' and sclk_old_r = '1' and
-            sdat_old_r = '0' and sdat = '1' then
+          sdat_old_r = '0' and sdat = '1' then
 
             curr_state_r <= wait_start;
             status_counter_r <= status_counter_r + 1;
-            
+            clk_counter_r <= 0;
+
+          elsif sclk = '1' and sclk_old_r = '0' then
+            clk_counter_r <= clk_counter_r + 1;
           end if;
 
       end case;
@@ -275,6 +285,6 @@ begin  -- testbench
 
   -- End of simulation, but not during the reset
   assert finished = '0' or rst_n = '0' report
-    "Simulation done" severity failure;
-  
+  "Simulation done" severity failure;
+
 end testbench;
