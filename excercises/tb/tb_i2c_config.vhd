@@ -61,6 +61,7 @@ architecture testbench of tb_i2c_config is
                                                             "0000001000011010",
                                                             "0000000000011010"
                                                             );
+  signal expected_bit_r : std_logic;
 
   -- Signals fed to the DUV
   signal clk   : std_logic := '0';  -- Remember that default values supported
@@ -207,6 +208,7 @@ begin  -- testbench
               -- Normally just receive a bit
               bit_counter_r <= bit_counter_r + 1;
 
+              expected_bit_r <= temp_transmission_r(byte_counter_r)(7 - bit_counter_r);
               assert (temp_transmission_r(byte_counter_r)(7 - bit_counter_r) = sdat) report
                 "Wrong bit!" severity failure;
 

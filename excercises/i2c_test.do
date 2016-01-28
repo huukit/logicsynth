@@ -17,7 +17,6 @@ add wave -position 3  sim:/tb_i2c_config/sdat_r
 add wave -position 4  sim:/tb_i2c_config/sclk
 add wave -position 4  sim:/tb_i2c_config/sdat_r
 add wave -position end  sim:/tb_i2c_config/temp_transmission_r
-add wave -position 10  -format Literal -height 18
 add wave -position 6  sim:/tb_i2c_config/i2c_config_1/next_state_r
 
 
