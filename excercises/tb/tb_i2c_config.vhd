@@ -175,6 +175,9 @@ begin  -- testbench
         
       end if;
 
+      if(curr_state_r /= read_byte) then
+        expected_bit_r <= 'X';
+      end if;
 
       -------------------------------------------------------------------------
       -- FSM

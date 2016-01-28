@@ -76,7 +76,6 @@ begin
 
     sclk_out <= sclk_r;
     finished_out <= param_status_r(n_params_g - 1);
-    -- sdat_inout <= sdat_r;
     sdat_r <= sdat_inout;
     param_status_out <= param_status_r;
 
@@ -136,59 +135,41 @@ begin
                     when stop_condition =>
                         if(sdat_inout = '0' and sclk_r = '1') then
                             sdat_inout <= '1';
-                            if(status_counter_r = n_params_g - 1) then
-                                param_status_r(to_integer(status_counter_r)) <= '1';
-                            else
-                                next_state_r <= start_condition;
-                            end if;
-                        -- elsif((sdat_inout = '1' or sdat_inout = 'Z') and sclk_r = '0') then
-                            -- sdat_inout <= '0';
-                        -- else
+                            next_state_r <= start_condition;
+                            status_counter_r <= status_counter_r + 1;
+                            param_status_r(to_integer(status_counter_r)) <= '1';
                         elsif(sdat_inout = 'Z') then
                             sdat_inout <= '0';
-                            -- sdat_inout <= 'Z';
                         end if;
 
                     when acknowledge =>
+                        bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                         if(sclk_r = '1') then
-                            -- present_state_r <= data_transfer;
-                            -- bit_counter_r <= to_unsigned(7, bit_counter_r'length);
-                            -- data_counter_r <= data_counter_r + 1;
                             if(sdat_inout = '1') then
                                 next_state_r <= start_condition;
-                                bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                             elsif(sdat_inout = '0') then
                                 if(data_counter_r = 2) then
                                     next_state_r <= stop_condition;
-                                    bit_counter_r <= to_unsigned(7, bit_counter_r'length);
-                                    status_counter_r <= status_counter_r + 1;
-                                    param_status_r(to_integer(status_counter_r)) <= '1';
                                 else
                                     next_state_r <= data_transfer;
                                     present_state_r <= data_transfer;
-                                    bit_counter_r <= to_unsigned(7, bit_counter_r'length);
                                     data_counter_r <= data_counter_r + 1;
                                 end if;
                             end if;
-                        -- else    -- sclk_r = '0'
-                            -- sdat_inout <= 'Z';
                         end if;
 
                     when data_transfer =>
                         if(sclk_r = '0') then
                             sdat_inout <= temp_transmission_r(to_integer(data_counter_r))(to_integer(bit_counter_r));
                             if(bit_counter_r = 0) then
-                                -- bit_counter_r <= to_unsigned(7, 3);
-                                -- next_state_r <= acknowledge;
+                                else
+                                    bit_counter_r <= bit_counter_r - 1;
+                                end if;
                             else
-                                bit_counter_r <= bit_counter_r - 1;
+                                if(bit_counter_r = 0) then
+                                    next_state_r <= acknowledge;
+                                end if;
                             end if;
-                        else
-                            if(bit_counter_r = 0) then
-                                bit_counter_r <= to_unsigned(7, 3);
-                                next_state_r <= acknowledge;
-                            end if;
-                        end if;
 
                 end case;
             end if;
