@@ -67,7 +67,7 @@ architecture testbench of tb_i2c_config is
   signal clk_counter_r      : integer;
 
   type nack_places_arr is array (n_params_c - 1 downto 0) of std_logic_vector(2 downto 0);
-  constant nack_places_c    : nack_places_arr :=    (
+  signal nack_places_r    : nack_places_arr :=    (
                                                       "100",
                                                       "000",
                                                       "010",
@@ -184,7 +184,7 @@ begin  -- testbench
         -- If we are supposed to send ack
         if curr_state_r = send_ack then
 
-          if(nack_places_c(status_counter_r)(byte_counter_r) = '1' and nack_sent_r = '0') then
+          if(nack_places_r(status_counter_r)(byte_counter_r) = '1' and nack_sent_r = '0') then
             sdat_r <= '1';
             nack_sent_r <= '1';
           else
@@ -217,11 +217,18 @@ begin  -- testbench
           temp_transmission_r(1) <= transmission_data_c(status_counter_r)(15 downto 8);
           temp_transmission_r(2) <= transmission_data_c(status_counter_r)(7 downto 0);
 
+          assert clk_counter_r /= max_wait_clks_c report
+          "Start signal taking too long" severity failure;
+
           -- While clk stays high, the sdat falls
           if sclk = '1' and sclk_old_r = '1' and
           sdat_old_r = '1' and sdat = '0' then
 
             curr_state_r <= read_byte;
+            clk_counter_r <= 0;
+
+          elsif sclk = '1' and sclk_old_r = '0' then
+            clk_counter_r <= clk_counter_r + 1;
 
           end if;
 
@@ -261,6 +268,8 @@ begin  -- testbench
             if(nack_sent_r = '1') then
               byte_counter_r <= 0;
               curr_state_r <= wait_start;
+              nack_sent_r <= '0';
+              nack_places_r(status_counter_r)(byte_counter_r) <= '0';
 
             elsif byte_counter_r /= n_bytes_c-1 then
 
@@ -292,7 +301,6 @@ begin  -- testbench
             curr_state_r <= wait_start;
             status_counter_r <= status_counter_r + 1;
             clk_counter_r <= 0;
-            nack_sent_r <= '0';
 
           elsif sclk = '1' and sclk_old_r = '0' then
             clk_counter_r <= clk_counter_r + 1;

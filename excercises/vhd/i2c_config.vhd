@@ -98,7 +98,6 @@ begin
         if(rst_n = '0') then
             sdat_inout <= 'Z';
             present_state_r <= start_condition;
-            -- next_state_r <= start_condition;
             bit_counter_r <= to_unsigned(7, bit_counter_r'length);
             byte_counter_r <= to_unsigned(0, byte_counter_r'length);
             status_counter_r <= to_unsigned(0, status_counter_r'length);
