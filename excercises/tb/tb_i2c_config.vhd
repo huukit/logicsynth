@@ -66,6 +66,21 @@ architecture testbench of tb_i2c_config is
   constant max_wait_clks_c  : integer := 10;
   signal clk_counter_r      : integer;
 
+  type nack_places_arr is array (n_params_c - 1 downto 0) of std_logic_vector(2 downto 0);
+  constant nack_places_c    : nack_places_arr :=    (
+                                                      "100",
+                                                      "000",
+                                                      "010",
+                                                      "000",
+                                                      "001",
+                                                      "000",
+                                                      "010",
+                                                      "000",
+                                                      "001",
+                                                      "100"
+                                                    );
+  signal nack_sent_r        : std_logic;
+
   -- Signals fed to the DUV
   signal clk   : std_logic := '0';  -- Remember that default values supported
   signal rst_n : std_logic := '0';      -- only in synthesis
@@ -151,6 +166,8 @@ begin  -- testbench
       clk_counter_r <= 0;
 
       sdat_r <= 'Z';
+
+      nack_sent_r <= '0';
       
     elsif clk'event and clk = '1' then  -- rising clock edge
 
@@ -167,16 +184,21 @@ begin  -- testbench
         -- If we are supposed to send ack
         if curr_state_r = send_ack then
 
+          if(nack_places_c(status_counter_r)(byte_counter_r) = '1' and nack_sent_r = '0') then
+            sdat_r <= '1';
+            nack_sent_r <= '1';
+          else
           -- Send ack (low = ACK, high = NACK)
-          sdat_r <= '0';
+            sdat_r <= '0';
+          end if;
 
         else
 
           -- Otherwise, sdat is in high impedance state.
           sdat_r <= 'Z';
-          
+
         end if;
-        
+
       end if;
 
       if(curr_state_r /= read_byte) then
@@ -197,14 +219,14 @@ begin  -- testbench
 
           -- While clk stays high, the sdat falls
           if sclk = '1' and sclk_old_r = '1' and
-            sdat_old_r = '1' and sdat = '0' then
+          sdat_old_r = '1' and sdat = '0' then
 
             curr_state_r <= read_byte;
 
           end if;
 
-          --------------------------------------------------------------------
-          -- Wait for a byte to be read
+        --------------------------------------------------------------------
+        -- Wait for a byte to be read
         when read_byte =>
 
           -- Detect a rising edge
@@ -217,43 +239,47 @@ begin  -- testbench
 
               expected_bit_r <= temp_transmission_r(byte_counter_r)(7 - bit_counter_r);
               assert (temp_transmission_r(byte_counter_r)(7 - bit_counter_r) = sdat) report
-                "Wrong bit!" severity failure;
+              "Wrong bit!" severity failure;
 
             else
 
               -- When terminal count is reached, let's send the ack
               curr_state_r  <= send_ack;
               bit_counter_r <= 0;
-              
+
             end if;  -- Bit counter terminal count
-            
+
           end if;  -- sclk rising clock edge
 
-          --------------------------------------------------------------------
-          -- Send acknowledge
+        --------------------------------------------------------------------
+        -- Send acknowledge
         when send_ack =>
 
           -- Detect a rising edge
           if sclk = '1' and sclk_old_r = '0' then
-            
-            if byte_counter_r /= n_bytes_c-1 then
+
+            if(nack_sent_r = '1') then
+              byte_counter_r <= 0;
+              curr_state_r <= wait_start;
+
+            elsif byte_counter_r /= n_bytes_c-1 then
 
               -- Transmission continues
               byte_counter_r <= byte_counter_r + 1;
               curr_state_r   <= read_byte;
-              
+
             else
 
               -- Transmission is about to stop
               byte_counter_r <= 0;
               curr_state_r   <= wait_stop;
-              
+
             end if;
 
           end if;
 
-          ---------------------------------------------------------------------
-          -- Wait for the stop condition
+        ---------------------------------------------------------------------
+        -- Wait for the stop condition
         when wait_stop =>
 
           assert clk_counter_r /= max_wait_clks_c report
@@ -266,6 +292,7 @@ begin  -- testbench
             curr_state_r <= wait_start;
             status_counter_r <= status_counter_r + 1;
             clk_counter_r <= 0;
+            nack_sent_r <= '0';
 
           elsif sclk = '1' and sclk_old_r = '0' then
             clk_counter_r <= clk_counter_r + 1;

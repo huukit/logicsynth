@@ -63,7 +63,7 @@ architecture rtl of i2c_config is
     signal sclk_prescaler_r         : unsigned(integer(ceil(log2(real(prescaler_max_c)))) downto 0);
     signal present_state_r          : state_type;
     signal bit_counter_r            : unsigned(2 downto 0);
-    signal data_counter_r           : unsigned(1 downto 0);
+    signal byte_counter_r           : unsigned(1 downto 0);
     signal status_counter_r         : unsigned(3 downto 0);
     signal param_status_r           : std_logic_vector(n_params_g - 1 downto 0);
     signal temp_transmission_r      : temp_transmission_arr;
@@ -100,7 +100,7 @@ begin
             present_state_r <= start_condition;
             -- next_state_r <= start_condition;
             bit_counter_r <= to_unsigned(7, bit_counter_r'length);
-            data_counter_r <= to_unsigned(0, data_counter_r'length);
+            byte_counter_r <= to_unsigned(0, byte_counter_r'length);
             status_counter_r <= to_unsigned(0, status_counter_r'length);
             param_status_r <= (others => '0');
             temp_transmission_r(0) <= (others => '0');
@@ -121,7 +121,7 @@ begin
                             sdat_inout <= '0';
                             present_state_r <= data_transfer;
                             bit_counter_r <= to_unsigned(7, bit_counter_r'length);
-                            data_counter_r <= to_unsigned(0, data_counter_r'length);
+                            byte_counter_r <= to_unsigned(0, byte_counter_r'length);
                             temp_transmission_r(0) <= codec_address_c;
                             temp_transmission_r(1) <= transmission_data_c(to_integer(status_counter_r))(15 downto 8);
                             temp_transmission_r(2) <= transmission_data_c(to_integer(status_counter_r))(7 downto 0);
@@ -146,18 +146,18 @@ begin
                             if(sdat_inout = '1') then
                                 present_state_r <= start_condition;
                             elsif(sdat_inout = '0') then
-                                if(data_counter_r = 2) then
+                                if(byte_counter_r = 2) then
                                     present_state_r <= stop_condition;
                                 else
                                     present_state_r <= data_transfer;
-                                    data_counter_r <= data_counter_r + 1;
+                                    byte_counter_r <= byte_counter_r + 1;
                                 end if;
                             end if;
                         end if;
 
                     when data_transfer =>
                         if(sclk_r = '0') then
-                            sdat_inout <= temp_transmission_r(to_integer(data_counter_r))(to_integer(bit_counter_r));
+                            sdat_inout <= temp_transmission_r(to_integer(byte_counter_r))(to_integer(bit_counter_r));
                         else
                             if(bit_counter_r = 0) then
                                 present_state_r <= acknowledge;
