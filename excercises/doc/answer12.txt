@@ -1,0 +1,18 @@
+process descriptions
+
+generate_sclk:
+Generates the i2c clk using a counter. When the counter hits max
+value, the clock changes state.
+
+generate_sdat:
+Checks asynchronously for reset.
+Actual logic is mostly contained in a case, where the argument is the present_state.
+The logic is comprised of a FSM, with states
+start_condition -> data_transfer -> acknowledge -> stop_condition -> ...
+
+Missing values
+
+000000001	p.53	    table Digital Audio Interface Format
+
+000000010	p.53-54	    table Sampling Control
+
