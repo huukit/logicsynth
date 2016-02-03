@@ -133,7 +133,7 @@ begin
                             temp_transmission_r(0) <= codec_address_c;
                             temp_transmission_r(1) <= transmission_data_c(to_integer(status_counter_r))(15 downto 8);
                             temp_transmission_r(2) <= transmission_data_c(to_integer(status_counter_r))(7 downto 0);
-                        elsif(sclk_r = '0' and present_state_r = start_condition) then
+                        elsif(sclk_r = '0') then
                             -- set sdat high so it can be pulled low
                             sdat_inout <= '1';
                         end if;
@@ -146,10 +146,9 @@ begin
                             -- 3 byte transfer is done, increment status
                             status_counter_r <= status_counter_r + 1;
                             param_status_r(to_integer(status_counter_r)) <= '1';
-                        elsif(sdat_inout = '1' and sclk_r = '0') then
                             -- after stop cond, go to start
                             present_state_r <= start_condition;
-                        elsif(sdat_inout = 'Z') then
+                        elsif(sclk_r = '0') then
                             sdat_inout <= '0';
                         end if;
 
