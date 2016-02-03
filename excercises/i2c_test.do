@@ -1,4 +1,4 @@
-vsim my_lib.tb_i2c_config
+vsim work.tb_i2c_config
 
 add wave -position end  sim:/tb_i2c_config/sdat
 add wave -position end  sim:/tb_i2c_config/bit_counter_r
@@ -15,4 +15,4 @@ add wave -position end  sim:/tb_i2c_config/i2c_config_1/temp_transmission_r
 
 add wave -position end sim:/tb_i2c_config/temp_transmission_r
 
-run 15ms
+run 22ms
