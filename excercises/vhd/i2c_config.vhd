@@ -16,18 +16,21 @@
 -- Revisions  :
 -- Date             Version     Author          Description
 -- 20.01.2016       1.0         nikulaj         Created
+-- 03.02.2016       1.1         huukitu         Moved data to pkg.
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
+use work.i2c_data_pkg.all; -- Separate package for data so that the this file does not
+                           -- have to be edited if the data is changed.
 
 -- define the entity
 entity i2c_config is
     generic(
         ref_clk_freq_g  : integer := 50000000;      -- reference clk
         i2c_freq_g      : integer := 20000;         -- wanted i2c frequency
-        n_params_g      : integer := 10             -- amount of 3 byte transmissions
+        n_params_g      : integer := params_g             -- amount of 3 byte transmissions
     );
     port(
         clk                 : in    std_logic;
@@ -40,10 +43,8 @@ entity i2c_config is
 end i2c_config;
 
 architecture rtl of i2c_config is
-
     -- type definitions
     type state_type is (start_condition, stop_condition, acknowledge, data_transfer);
-    type transmission_data_arr is array (n_params_g - 1 downto 0) of std_logic_vector(15 downto 0);
     type temp_transmission_arr is array (2 downto 0) of std_logic_vector(7 downto 0);
     
     -- constants
@@ -52,18 +53,6 @@ architecture rtl of i2c_config is
 
     -- data to be sent
     constant codec_address_c        : std_logic_vector(7 downto 0) := "00110100";
-    constant transmission_data_c    : transmission_data_arr := (
-                                                            "0001001000000001",
-                                                            "0001000000000010",
-                                                            "0000111000000001",
-                                                            "0000110000000000",
-                                                            "0000101000000110",
-                                                            "0000100011111000",
-                                                            "0000011001111011",
-                                                            "0000010001111011",
-                                                            "0000001000011010",
-                                                            "0000000000011010"
-                                                            );
 
     -- registers
     signal sclk_r                   : std_logic;
@@ -105,6 +94,7 @@ begin
             end if;
         end if;
     end process generate_sclk;
+
 
     -- i2c data output process
     generate_sdat : process(clk, rst_n)
