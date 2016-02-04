@@ -28,7 +28,7 @@ entity tb_audio_ctrl is
     data_width_g    : integer := 16;
     step_w_r_g      : integer := 2;
     step_w_l_g      : integer := 10;
-    ref_clk_freq_g  : integer := 18432000;
+    ref_clk_freq_g  : integer := 2000000;
     sample_rate_g   : integer := 48000
   );
 end tb_audio_ctrl;
@@ -38,7 +38,7 @@ architecture testbench of tb_audio_ctrl is
   -- Component definitions.
   component audio_ctrl is
     generic(
-      ref_clk_freq_g  : integer := 18432000;
+      ref_clk_freq_g  : integer := 2000000;
       sample_rate_g   : integer := 48000;
       data_width_g    : integer
     );
@@ -162,7 +162,7 @@ begin -- testbench
   -- Clock, reset and sync generation.
   clk <= not clk after clockrate_ns_c/2; -- Create clock pulse.
   rst_n <= '1' after clockrate_ns_c * 4; -- Reset high after 4 pulses.
-  sync_r <= not sync_r after 500 us;     -- Note: I wish testbenches had a pseudo random number generator..
+  sync_r <= not sync_r after 5 ms;     -- Note: I wish testbenches had a pseudo random number generator..
   
   -- Check generator sync behavior.
   check_generators : process(clk, rst_n)
