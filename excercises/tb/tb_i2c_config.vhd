@@ -16,10 +16,13 @@
 -- Revisions  :
 -- Date             Version     Author          Description
 -- 23.01.2016       1.0         nikulaj         Created
+-- 08.02.2016       1.1         nikulaj         Move data to pkg
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.i2c_data_pkg.all; -- Separate package for data so that the this file does not
+                           -- have to be edited if the data is changed.
 
 -------------------------------------------------------------------------------
 -- Empty entity
@@ -45,27 +48,15 @@ architecture testbench of tb_i2c_config is
   constant bit_count_max_c : integer := 8;
 
   -- Expected data
-    type transmission_data_arr is array (n_params_c - 1 downto 0) of std_logic_vector(15 downto 0);
-    type temp_transmission_arr is array (2 downto 0) of std_logic_vector(7 downto 0);
-    signal temp_transmission_r      : temp_transmission_arr;
-    constant codec_address_c        : std_logic_vector(7 downto 0) := "00110100";
-    constant transmission_data_c    : transmission_data_arr := (
-                                                            "0001001000000001",
-                                                            "0001000000000010",
-                                                            "0000111000000001",
-                                                            "0000110000000000",
-                                                            "0000101000000110",
-                                                            "0000100011111000",
-                                                            "0000011001111011",
-                                                            "0000010001111011",
-                                                            "0000001000011010",
-                                                            "0000000000011010"
-                                                            );
+  type temp_transmission_arr is array (2 downto 0) of std_logic_vector(7 downto 0);
+  signal temp_transmission_r      : temp_transmission_arr;
+  constant codec_address_c        : std_logic_vector(7 downto 0) := "00110100";
   signal expected_bit_r     : std_logic;
 
-  constant max_wait_clks_c  : integer := 10;
-  signal clk_counter_r      : integer;
+  constant max_wait_clks_c  : integer := 10;        -- max clk count that sending 
+  signal clk_counter_r      : integer;              -- a stop cond should take
 
+  -- places in the transmission where a nack should be sent
   type nack_places_arr is array (n_params_c - 1 downto 0) of std_logic_vector(2 downto 0);
   signal nack_places_r    : nack_places_arr :=    (
                                                       "100",
@@ -187,6 +178,7 @@ begin  -- testbench
           if(nack_places_r(status_counter_r)(byte_counter_r) = '1' and nack_sent_r = '0') then
             sdat_r <= '1';
             nack_sent_r <= '1';
+          -- if it's time to send a nack, send it
           else
           -- Send ack (low = ACK, high = NACK)
             sdat_r <= '0';
@@ -203,6 +195,12 @@ begin  -- testbench
 
       if(curr_state_r /= read_byte) then
         expected_bit_r <= 'X';
+      end if;
+      
+      if sclk = '1' and sclk_old_r = '1' and    -- Sdat changed unexpectantly
+      sdat_old_r /= sdat then                   -- when clk high
+        assert curr_state_r /= read_byte report 
+        "Sdat change while clk high and not expecting condition!" severity failure;
       end if;
 
       -------------------------------------------------------------------------
@@ -228,7 +226,8 @@ begin  -- testbench
             clk_counter_r <= 0;
 
           elsif sclk = '1' and sclk_old_r = '0' then
-            clk_counter_r <= clk_counter_r + 1;
+            clk_counter_r <= clk_counter_r + 1;  -- if no start cond detected,
+                                                 -- increment counter
 
           end if;
 
@@ -265,7 +264,7 @@ begin  -- testbench
           -- Detect a rising edge
           if sclk = '1' and sclk_old_r = '0' then
 
-            if(nack_sent_r = '1') then
+            if(nack_sent_r = '1') then      -- nack was sent, so restart transmission
               byte_counter_r <= 0;
               curr_state_r <= wait_start;
               nack_sent_r <= '0';
@@ -303,8 +302,8 @@ begin  -- testbench
             clk_counter_r <= 0;
 
           elsif sclk = '1' and sclk_old_r = '0' then
-            clk_counter_r <= clk_counter_r + 1;
-          end if;
+            clk_counter_r <= clk_counter_r + 1;   -- if no start cond detected,
+          end if;                                 -- increment counter
 
       end case;
 

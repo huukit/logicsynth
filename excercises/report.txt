@@ -1,0 +1,36 @@
+Coverage Report Totals BY FILES: Number of Files 0
+
+    Enabled Coverage            Active      Hits    Misses    Weight % Covered
+    ----------------            ------      ----    ------    ------ ---------
+    Stmts                            0         0         0         1     100.0
+    Branches                         0         0         0         1     100.0
+    Conditions                                                     1     100.0
+        UDP Condition Rows           0         0         0         1     100.0
+        FEC Condition Terms          0         0         0         1     100.0
+    Expressions                                                    1     100.0
+        UDP Expression Rows          0         0         0         1     100.0
+        FEC Expression Terms         0         0         0         1     100.0
+    FSMs                                                           1     100.0
+        States                       0         0         0         1     100.0
+        Transitions                  0         0         0         1     100.0
+
+Coverage Report Totals BY INSTANCES: Number of Instances 2
+
+    Enabled Coverage            Active      Hits    Misses    Weight % Covered
+    ----------------            ------      ----    ------    ------ ---------
+    Stmts                            0         0         0         1     100.0
+    Branches                         0         0         0         1     100.0
+    Conditions                                                     1     100.0
+        UDP Condition Rows           0         0         0         1     100.0
+        FEC Condition Terms          0         0         0         1     100.0
+    Expressions                                                    1     100.0
+        UDP Expression Rows          0         0         0         1     100.0
+        FEC Expression Terms         0         0         0         1     100.0
+    FSMs                                                           1     100.0
+        States                       0         0         0         1     100.0
+        Transitions                  0         0         0         1     100.0
+    Toggle Bins                      0         0         0         1     100.0
+    Assertions                       6         5         1         1      83.3
+
+Total coverage (filtered view): 83.3%
+
