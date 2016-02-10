@@ -190,7 +190,7 @@ begin -- rtl
         if(clk'event and clk = '1' and rst_n = '1') then -- Calculate on rising edge of clock.
             divider := 0;
             for I in 0 to n_keys_g - 1 loop     -- calculate how many buttons are pushed
-                if (keys_in(I) = '0') then
+                if (keys_input_r(I) = '0') then
                     divider := divider + 1;
                 end if;
             end loop;
