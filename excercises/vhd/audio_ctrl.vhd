@@ -110,7 +110,7 @@ begin --rtl
           left_data_ss_r <= left_data_in; -- Store snapshots.
           right_data_ss_r <= right_data_in;  
         end if;
-      elsif(bclk_r = '0' and bclk_count_r = (fs_c - 1)) then -- Load next bit(s).
+      elsif(bclk_r = '0' and bclk_count_r = (fs_c -1)) then -- Load next bit(s).
       
         if(lr_r = '1') then -- load left data.
           aud_data_r <= left_data_ss_r(to_integer(lr_count_r / 2)); 
