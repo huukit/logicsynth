@@ -113,9 +113,9 @@ begin -- rtl
         variable temp : integer := 0;
         variable divider : integer := 0;
     begin
-        -- Only process on clock rising edge, and when NOT in reset mode
-        if(clk'event and clk = '1' and rst_n = '1') then -- Calculate on rising edge of clock.
-            divider := 0;
+        if(rst_n = '0') then
+        elsif(clk'event and clk = '1') then -- Calculate on rising edge of clock.
+            divider := 0;                   -- Only process on clock rising edge, and when NOT in reset mode
             for I in 0 to n_keys_g - 1 loop     -- calculate how many buttons are pushed
                 if (keys_in(I) = '0') then
                     divider := divider + 1;
