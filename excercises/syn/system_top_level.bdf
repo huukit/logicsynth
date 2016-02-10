@@ -88,6 +88,22 @@ applicable agreement for further details.
 	(annotation_block (location)(rect -24 528 32 544))
 )
 (pin
+	(input)
+	(rect 32 576 208 592)
+	(text "INPUT" (rect 133 0 161 10)(font "Arial" (font_size 6)))
+	(text "pin_melody_n" (rect 5 0 74 12)(font "Arial" ))
+	(pt 176 8)
+	(drawing
+		(line (pt 92 12)(pt 117 12))
+		(line (pt 92 4)(pt 117 4))
+		(line (pt 121 8)(pt 176 8))
+		(line (pt 92 12)(pt 92 4))
+		(line (pt 117 4)(pt 121 8))
+		(line (pt 117 12)(pt 121 8))
+	)
+	(text "VCC" (rect 136 7 156 17)(font "Arial" (font_size 6)))
+)
+(pin
 	(output)
 	(rect 704 88 880 104)
 	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
@@ -242,56 +258,6 @@ applicable agreement for further details.
 	(annotation_block (location)(rect 880 88 936 104))
 )
 (symbol
-	(rect 376 48 592 160)
-	(text "i2c_config" (rect 5 0 55 12)(font "Arial" ))
-	(text "inst" (rect 8 96 25 108)(font "Arial" ))
-	(port
-		(pt 0 32)
-		(input)
-		(text "clk" (rect 0 0 14 12)(font "Arial" ))
-		(text "clk" (rect 21 27 35 39)(font "Arial" ))
-		(line (pt 0 32)(pt 16 32))
-	)
-	(port
-		(pt 0 48)
-		(input)
-		(text "rst_n" (rect 0 0 24 12)(font "Arial" ))
-		(text "rst_n" (rect 21 43 45 55)(font "Arial" ))
-		(line (pt 0 48)(pt 16 48))
-	)
-	(port
-		(pt 216 48)
-		(output)
-		(text "sclk_out" (rect 0 0 41 12)(font "Arial" ))
-		(text "sclk_out" (rect 161 43 195 55)(font "Arial" ))
-		(line (pt 216 48)(pt 200 48))
-	)
-	(port
-		(pt 216 64)
-		(output)
-		(text "param_status_out[9..0]" (rect 0 0 114 12)(font "Arial" ))
-		(text "param_status_out[9..0]" (rect 99 59 195 71)(font "Arial" ))
-		(line (pt 216 64)(pt 200 64)(line_width 3))
-	)
-	(port
-		(pt 216 80)
-		(output)
-		(text "finished_out" (rect 0 0 60 12)(font "Arial" ))
-		(text "finished_out" (rect 145 75 195 87)(font "Arial" ))
-		(line (pt 216 80)(pt 200 80))
-	)
-	(port
-		(pt 216 32)
-		(bidir)
-		(text "sdat_inout" (rect 0 0 50 12)(font "Arial" ))
-		(text "sdat_inout" (rect 155 27 205 39)(font "Arial" ))
-		(line (pt 216 32)(pt 200 32))
-	)
-	(drawing
-		(rectangle (rect 16 16 200 96))
-	)
-)
-(symbol
 	(rect 368 184 632 336)
 	(text "audio_pll" (rect 107 0 167 16)(font "Arial" (font_size 10)))
 	(text "inst2" (rect 8 136 31 148)(font "Arial" ))
@@ -368,7 +334,7 @@ applicable agreement for further details.
 		(pt 16 48)
 		(output)
 		(text "OUT" (rect 32 7 49 19)(font "Courier New" (bold))(invisible))
-		(text "OUT" (rect 13 32 25 46)(font "Courier New" (bold))(vertical)(invisible))
+		(text "OUT" (rect 13 32 25 49)(font "Courier New" (bold))(vertical)(invisible))
 		(line (pt 16 39)(pt 16 48))
 	)
 	(drawing
@@ -406,9 +372,75 @@ applicable agreement for further details.
 	)
 )
 (symbol
+	(rect 376 48 648 160)
+	(text "i2c_config" (rect 5 0 55 12)(font "Arial" ))
+	(text "inst" (rect 8 96 25 108)(font "Arial" ))
+	(port
+		(pt 0 32)
+		(input)
+		(text "clk" (rect 0 0 14 12)(font "Arial" ))
+		(text "clk" (rect 21 27 35 39)(font "Arial" ))
+		(line (pt 0 32)(pt 16 32))
+	)
+	(port
+		(pt 0 48)
+		(input)
+		(text "rst_n" (rect 0 0 24 12)(font "Arial" ))
+		(text "rst_n" (rect 21 43 45 55)(font "Arial" ))
+		(line (pt 0 48)(pt 16 48))
+	)
+	(port
+		(pt 272 48)
+		(output)
+		(text "sclk_out" (rect 0 0 41 12)(font "Arial" ))
+		(text "sclk_out" (rect 217 43 258 55)(font "Arial" ))
+		(line (pt 272 48)(pt 256 48))
+	)
+	(port
+		(pt 272 64)
+		(output)
+		(text "param_status_out[n_params_g-1..0]" (rect 0 0 178 12)(font "Arial" ))
+		(text "param_status_out[n_params_g-1..0]" (rect 101 59 279 71)(font "Arial" ))
+		(line (pt 272 64)(pt 256 64)(line_width 3))
+	)
+	(port
+		(pt 272 80)
+		(output)
+		(text "finished_out" (rect 0 0 60 12)(font "Arial" ))
+		(text "finished_out" (rect 201 75 261 87)(font "Arial" ))
+		(line (pt 272 80)(pt 256 80))
+	)
+	(port
+		(pt 272 32)
+		(bidir)
+		(text "sdat_inout" (rect 0 0 50 12)(font "Arial" ))
+		(text "sdat_inout" (rect 211 27 261 39)(font "Arial" ))
+		(line (pt 272 32)(pt 256 32))
+	)
+	(parameter
+		"ref_clk_freq_g"
+		"50000000"
+		""
+		(type "PARAMETER_SIGNED_DEC")	)
+	(parameter
+		"i2c_freq_g"
+		"20000"
+		""
+		(type "PARAMETER_SIGNED_DEC")	)
+	(parameter
+		"n_params_g"
+		"10"
+		""
+		(type "PARAMETER_SIGNED_DEC")	)
+	(drawing
+		(rectangle (rect 16 16 256 96))
+	)
+	(annotation_block (parameter)(rect 648 -8 872 48))
+)
+(symbol
 	(rect 408 456 656 568)
-	(text "synthesizer" (rect 5 0 61 12)(font "Arial" ))
-	(text "inst1" (rect 8 96 31 108)(font "Arial" ))
+	(text "piano" (rect 5 0 30 12)(font "Arial" ))
+	(text "inst6" (rect 8 96 31 108)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -429,6 +461,13 @@ applicable agreement for further details.
 		(text "keys_in[n_keys_g-1..0]" (rect 0 0 116 12)(font "Arial" ))
 		(text "keys_in[n_keys_g-1..0]" (rect 21 59 137 71)(font "Arial" ))
 		(line (pt 0 64)(pt 16 64)(line_width 3))
+	)
+	(port
+		(pt 0 80)
+		(input)
+		(text "melody_in" (rect 0 0 50 12)(font "Arial" ))
+		(text "melody_in" (rect 21 75 71 87)(font "Arial" ))
+		(line (pt 0 80)(pt 16 80))
 	)
 	(port
 		(pt 248 32)
@@ -457,6 +496,11 @@ applicable agreement for further details.
 		""
 		(type "PARAMETER_SIGNED_DEC")	)
 	(parameter
+		"melody_clk_div"
+		"9216000"
+		""
+		(type "PARAMETER_SIGNED_DEC")	)
+	(parameter
 		"sample_rate_g"
 		"48000"
 		""
@@ -474,24 +518,11 @@ applicable agreement for further details.
 	(drawing
 		(rectangle (rect 16 16 232 96))
 	)
-	(annotation_block (parameter)(rect 712 360 936 432))
+	(annotation_block (parameter)(rect 656 368 888 456))
 )
 (connector
 	(pt 376 96)
 	(pt 272 96)
-)
-(connector
-	(pt 592 80)
-	(pt 704 80)
-)
-(connector
-	(pt 592 112)
-	(pt 704 112)
-	(bus)
-)
-(connector
-	(pt 592 96)
-	(pt 704 96)
 )
 (connector
 	(pt 272 264)
@@ -600,6 +631,31 @@ applicable agreement for further details.
 (connector
 	(pt 656 520)
 	(pt 720 520)
+)
+(connector
+	(pt 704 80)
+	(pt 648 80)
+)
+(connector
+	(pt 648 96)
+	(pt 704 96)
+)
+(connector
+	(pt 648 112)
+	(pt 704 112)
+	(bus)
+)
+(connector
+	(pt 408 536)
+	(pt 240 536)
+)
+(connector
+	(pt 240 536)
+	(pt 240 584)
+)
+(connector
+	(pt 208 584)
+	(pt 240 584)
 )
 (junction (pt 272 120))
 (junction (pt 328 520))
