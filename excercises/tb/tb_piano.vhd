@@ -34,6 +34,7 @@ architecture structural of tb_piano is
   component piano
     generic (
       clk_freq_g    : INTEGER;
+      melody_clk_div: INTEGER;
       sample_rate_g : INTEGER;
       data_width_g  : INTEGER;
       n_keys_g      : INTEGER);
@@ -60,6 +61,7 @@ architecture structural of tb_piano is
   end component;
 
   constant clk_freq_c    : integer := 20000000;
+  constant melody_clk_c  : integer := 18432000 / 2;
   constant sample_rate_c : integer := 48000;
   constant data_width_c  : integer := 16;
   constant n_keys_c      : integer := 4;
@@ -80,7 +82,7 @@ architecture structural of tb_piano is
 
 
   signal   counter_r       : integer;
-  constant button_period_c : integer := 2**data_width_c *  10; 
+  constant button_period_c : integer := 2**data_width_c; 
   
 
   
@@ -94,6 +96,7 @@ begin  -- structural
   i_duv_synth: piano
     generic map (
         clk_freq_g    => clk_freq_c,
+        melody_clk_div=> melody_clk_c,
         sample_rate_g => sample_rate_c,
         data_width_g  => data_width_c,
         n_keys_g      => n_keys_c
@@ -128,7 +131,7 @@ begin  -- structural
 
       counter_r     <= 0;
       keys_tb_synth <= (others => '1');
-      melody_key_synth <= '1';
+      melody_key_synth <= '0';
     elsif clk'event and clk = '1' then  -- rising clock edge
 
       if counter_r = button_period_c then
