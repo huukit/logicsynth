@@ -104,21 +104,21 @@ begin --rtl
       aud_data_r <= '0';
     elsif(clk'event and clk = '1') then
     
-      if(lr_count_r = lr_c and  bclk_count_r = fs_c) then -- Store and load.
-        aud_data_r <= left_data_in(to_integer(lr_count_r / 2)); -- Load first bit.
-        if(lr_r = '1') then -- Only store snapshot on SOF.
+      if(lr_count_r = 0 and  bclk_count_r = 0) then -- Store and load.
+        if(lr_r = '0') then -- Only store snapshot on SOF.
           left_data_ss_r <= left_data_in; -- Store snapshots.
           right_data_ss_r <= right_data_in;  
+          aud_data_r <= left_data_in(to_integer(lr_count_r / 2)); -- Load first bit.
+        else
+          aud_data_r <= right_data_in(to_integer(lr_count_r / 2)); -- Load first bit.
+        end if;        
+      elsif(bclk_count_r = 0 and bclk_r = '1') then -- Load next byte on falling clock.
+        if(lr_r = '1') then
+          aud_data_r <= left_data_ss_r(to_integer((lr_count_r -1 )/ 2)); 
+        else
+          aud_data_r <= right_data_ss_r(to_integer((lr_count_r -1)/ 2)); 
         end if;
-      elsif(bclk_r = '0' and bclk_count_r = (fs_c -1)) then -- Load next bit(s).
-      
-        if(lr_r = '1') then -- load left data.
-          aud_data_r <= left_data_ss_r(to_integer(lr_count_r / 2)); 
-        else -- load right.
-          aud_data_r <= right_data_ss_r(to_integer(lr_count_r / 2)); 
-        end if;
-        
-      end if;   
+      end if; 
     end if;
    end process dataload;
    

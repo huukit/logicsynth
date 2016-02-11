@@ -192,12 +192,10 @@ begin -- testbench
       r_data_expected_r <= (others => '0');
       bitcounter_r <= bc_time;
     elsif(clk'event and clk = '1') then
-      if(bitcounter_r = bc_time) then -- Store a snapshot locally when the codecs start.
+      if(bitcounter_r = 0) then -- When we reach zero check the output ..
         l_data_expected_r <= l_data_wg_actrl;
         r_data_expected_r <= r_data_wg_actrl;
-        bitcounter_r <= bitcounter_r - 1;
-      elsif(bitcounter_r = 0) then -- When we reach zero check the output ..
-       	if(sync_r = '1') then -- .. assuming we have output .. 
+       	if(sync_r = '0') then -- .. assuming we have output .. 
        	  assert (l_data_expected_r = l_data_codec_tb) report "Mismatch in left input/output data" severity failure;
           assert (r_data_expected_r = r_data_codec_tb) report "Mismatch in right input/output data" severity failure;
         end if;
