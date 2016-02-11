@@ -108,9 +108,9 @@ begin --rtl
         if(lr_r = '0') then -- Only store snapshot on SOF.
           left_data_ss_r <= left_data_in; -- Store snapshots.
           right_data_ss_r <= right_data_in;  
-          aud_data_r <= left_data_in(to_integer(lr_count_r / 2)); -- Load first bit.
+          aud_data_r <= left_data_in(lr_c / 2); -- Load first bit.
         else
-          aud_data_r <= right_data_in(to_integer(lr_count_r / 2)); -- Load first bit.
+          aud_data_r <= right_data_ss_r(lr_c/ 2); -- Load first bit.
         end if;        
       elsif(bclk_count_r = 0 and bclk_r = '1') then -- Load next byte on falling clock.
         if(lr_r = '1') then
