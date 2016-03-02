@@ -17,6 +17,7 @@
 -- Date             Version     Author          Description
 -- 20.01.2016       1.0         nikulaj         Created
 -- 03.02.2016       1.1         huukitu         Moved data to pkg.
+-- 02.03.2016       1.2         nikulaj         Assign finished_out sequentially
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -55,6 +56,7 @@ architecture rtl of i2c_config is
     constant codec_address_c        : std_logic_vector(7 downto 0) := "00110100";
 
     -- registers
+    signal finished_r               : std_logic;
     signal sclk_r                   : std_logic;
     signal sclk_prescaler_r         : unsigned(integer(ceil(log2(real(prescaler_max_c)))) downto 0);
     signal present_state_r          : state_type;
@@ -66,9 +68,7 @@ architecture rtl of i2c_config is
 
 begin
 
-    -- assign the last bit of param_status to finished; When the last transmission
-    -- is done, the config is finished.
-    finished_out <= param_status_r(n_params_g - 1);
+    finished_out <= finished_r;
     param_status_out <= param_status_r;
 
     -- Only output clk when NOT finished
@@ -109,11 +109,15 @@ begin
             temp_transmission_r(0) <= (others => '0');
             temp_transmission_r(1) <= (others => '0');
             temp_transmission_r(2) <= (others => '0');
+            finished_r <= '0';
 
         elsif(clk'event and clk = '1') then
             if(param_status_r(n_params_g - 1) = '1') then
                 sdat_inout <= 'Z';          -- When finished, take config logic
                                             -- out of the circuit
+                -- assign the last bit of param_status to finished; When the last transmission
+                -- is done, the config is finished.
+                finished_r <= '1';
 
             elsif(present_state_r = acknowledge and sclk_prescaler_r = 0) then
                 sdat_inout <= 'Z';          -- set to high-Z, so that ack can be received
