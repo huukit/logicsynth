@@ -21,8 +21,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.i2c_data_pkg.all; -- Separate package for data so that the this file does not
-                           -- have to be edited if the data is changed.
+use work.tb_i2c_data_pkg.all; -- Separate package for data so that the this file does not
+                              -- have to be edited if the data is changed.
 
 -------------------------------------------------------------------------------
 -- Empty entity
@@ -73,7 +73,7 @@ architecture testbench of tb_i2c_config is
   signal nack_sent_r        : std_logic;
 
   -- Signals fed to the DUV
-  signal clk   : std_logic := '0';  -- Remember that default values supported
+  signal clk   : std_logic := '0';      -- Remember that default values supported
   signal rst_n : std_logic := '0';      -- only in synthesis
 
   -- The DUV prototype
