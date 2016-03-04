@@ -17,6 +17,7 @@
 -- Date             Version     Author          Description
 -- 23.01.2016       1.0         nikulaj         Created
 -- 08.02.2016       1.1         nikulaj         Move data to pkg
+-- 04.03.2016       1.2         nikulaj         Fix bit checking
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -102,7 +103,7 @@ architecture testbench of tb_i2c_config is
   signal sdat_r : std_logic;
 
   -- Counters for receiving bits and bytes
-  signal bit_counter_r      : integer range 0 to bit_count_max_c-1;
+  signal bit_counter_r      : integer range 0 to bit_count_max_c;
   signal byte_counter_r     : integer range 0 to n_bytes_c-1;
   signal status_counter_r   : integer range 0 to n_params_c-1;
 
@@ -238,7 +239,7 @@ begin  -- testbench
           -- Detect a rising edge
           if sclk = '1' and sclk_old_r = '0' then
 
-            if bit_counter_r /= bit_count_max_c-1 then
+            if bit_counter_r /= bit_count_max_c then
 
               -- Normally just receive a bit
               bit_counter_r <= bit_counter_r + 1;
