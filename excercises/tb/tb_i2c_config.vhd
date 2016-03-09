@@ -22,8 +22,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.tb_i2c_data_pkg.all; -- Separate package for data so that the this file does not
-                              -- have to be edited if the data is changed.
+
 
 -------------------------------------------------------------------------------
 -- Empty entity
@@ -53,6 +52,21 @@ architecture testbench of tb_i2c_config is
   signal temp_transmission_r      : temp_transmission_arr;
   constant codec_address_c        : std_logic_vector(7 downto 0) := "00110100";
   signal expected_bit_r     : std_logic;
+  type transmission_data_arr is array (n_params_c - 1 downto 0) of std_logic_vector(15 downto 0);
+  -- Actual transmission data array.
+  constant transmission_data_c    : transmission_data_arr := (
+                                                            "0001001000000001",
+                                                            "0001000000000010",
+                                                            "0000111000000001",
+                                                            "0000110000000000",
+                                                            "0000101000000110",
+                                                            "0000100011111000",
+                                                            "0000011001111011",
+                                                            "0000010001111011",
+                                                            "0000001000011010",
+                                                            "0000000000011010"
+                                                            );
+
 
   constant max_wait_clks_c  : integer := 10;        -- max clk count that sending 
   signal clk_counter_r      : integer;              -- a stop cond should take
